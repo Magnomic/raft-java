@@ -29,6 +29,7 @@ public class ExampleServiceImpl implements ExampleService {
     private ExampleStateMachine stateMachine;
     private int leaderId = -1;
     private RpcClient leaderRpcClient = null;
+    private ExampleService exampleService;
     private Lock leaderLock = new ReentrantLock();
 
     public ExampleServiceImpl(RaftNode raftNode, ExampleStateMachine stateMachine) {
@@ -37,6 +38,7 @@ public class ExampleServiceImpl implements ExampleService {
     }
 
     private void onLeaderChangeEvent() {
+        // 如果有leader，且自己不是Leader，且更换了Leader
         if (raftNode.getLeaderId() != -1
                 && raftNode.getLeaderId() != raftNode.getLocalServer().getServerId()
                 && leaderId != raftNode.getLeaderId()) {
@@ -60,16 +62,21 @@ public class ExampleServiceImpl implements ExampleService {
     @Override
     public ExampleProto.SetResponse set(ExampleProto.SetRequest request) {
         ExampleProto.SetResponse.Builder responseBuilder = ExampleProto.SetResponse.newBuilder();
-        // 如果自己不是leader，将写请求转发给leader
+        // 如果没Leader
         if (raftNode.getLeaderId() <= 0) {
             responseBuilder.setSuccess(false);
+            // 如果自己不是leader，将写请求转发给leader
         } else if (raftNode.getLeaderId() != raftNode.getLocalServer().getServerId()) {
+            // TODO: 如果是非关键事务，则发布未来事务（是否需要增加一致性哈希）
+            // 检查是否Leader已更换
             onLeaderChangeEvent();
-            ExampleService exampleService = BrpcProxy.getProxy(leaderRpcClient, ExampleService.class);
+            if (this.exampleService == null) {
+                this.exampleService = BrpcProxy.getProxy(leaderRpcClient, ExampleService.class);
+            }
             ExampleProto.SetResponse responseFromLeader = exampleService.set(request);
             responseBuilder.mergeFrom(responseFromLeader);
         } else {
-            // 数据同步写入raft集群
+            // 如果自己是Leader，数据同步写入raft集群
             byte[] data = request.toByteArray();
             boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_DATA);
             responseBuilder.setSuccess(success);

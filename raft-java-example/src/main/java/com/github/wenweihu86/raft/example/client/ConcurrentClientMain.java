@@ -17,7 +17,7 @@ import java.util.concurrent.Future;
 public class ConcurrentClientMain {
     private static JsonFormat jsonFormat = new JsonFormat();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         if (args.length != 1) {
             System.out.printf("Usage: ./run_concurrent_client.sh THREAD_NUM\n");
             System.exit(-1);
@@ -28,12 +28,13 @@ public class ConcurrentClientMain {
         RpcClient rpcClient = new RpcClient(ipPorts);
         ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);
 
-        ExecutorService readThreadPool = Executors.newFixedThreadPool(3);
-        ExecutorService writeThreadPool = Executors.newFixedThreadPool(3);
-        Future<?>[] future = new Future[3];
-        for (int i = 0; i < 3; i++) {
+        ExecutorService readThreadPool = Executors.newFixedThreadPool(30);
+        ExecutorService writeThreadPool = Executors.newFixedThreadPool(30);
+        Future<?>[] future = new Future[30];
+        for (int i = 0; i < 30; i++) {
             future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool));
         }
+        Thread.sleep(1000000L);
     }
 
     public static class SetTask implements Runnable {
@@ -47,7 +48,7 @@ public class ConcurrentClientMain {
 
         @Override
         public void run() {
-            while (true) {
+            for (int i=0;i<100;i++) {
                 String key = UUID.randomUUID().toString();
                 String value = UUID.randomUUID().toString();
                 ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()
@@ -83,17 +84,22 @@ public class ConcurrentClientMain {
         public void run() {
             ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()
                     .setKey(key).build();
-            long startTime = System.currentTimeMillis();
-            ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
-            try {
-                if (getResponse != null) {
-                    System.out.printf("get request, key=%s, response=%s, elapseMS=%d\n",
-                            key, jsonFormat.printToString(getResponse), System.currentTimeMillis() - startTime);
-                } else {
-                    System.out.printf("get request failed, key=%s\n", key);
+            while (true) {
+                long startTime = System.currentTimeMillis();
+                ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
+                try {
+                    if (getResponse != null) {
+                        System.out.printf("get request, key=%s, response=%s, elapseMS=%d\n",
+                                key, jsonFormat.printToString(getResponse), System.currentTimeMillis() - startTime);
+                        if (!"{}".equals(jsonFormat.printToString(getResponse))){
+                            break;
+                        }
+                    } else {
+                        System.out.printf("get request failed, key=%s\n", key);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
             }
         }
     }

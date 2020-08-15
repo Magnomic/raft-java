@@ -29,6 +29,13 @@ public class Peer {
         isCatchUp = false;
     }
 
+    // 创建新的 RpcClient
+    public RpcClient createClient() {
+        return new RpcClient(new Endpoint(    // rpc 客户端
+                server.getEndpoint().getHost(),
+                server.getEndpoint().getPort()));   // 通过 RpcClient 构建 RaftConsensusServiceAsync 的代理类
+    }
+
     public RaftProto.Server getServer() {
         return server;
     }

@@ -89,6 +89,7 @@ public class RaftNode {
         votedFor = raftLog.getMetaData().getVotedFor();
         commitIndex = Math.max(snapshot.getMetaData().getLastIncludedIndex(), raftLog.getMetaData().getCommitIndex());
         // discard old log entries
+        // if snapshot's index is bigger than current index, change current index to index(snapshot) + 1
         if (snapshot.getMetaData().getLastIncludedIndex() > 0
                 && raftLog.getFirstLogIndex() <= snapshot.getMetaData().getLastIncludedIndex()) {
             raftLog.truncatePrefix(snapshot.getMetaData().getLastIncludedIndex() + 1);
@@ -155,6 +156,7 @@ public class RaftNode {
                     .setData(ByteString.copyFrom(data)).build();
             List<RaftProto.LogEntry> entries = new ArrayList<>();
             entries.add(logEntry);
+            // Leader写入entries
             newLastLogIndex = raftLog.append(entries);
 //            raftLog.updateMetaData(currentTerm, null, raftLog.getFirstLogIndex());
 
@@ -202,6 +204,7 @@ public class RaftNode {
         lock.lock();
         try {
             long firstLogIndex = raftLog.getFirstLogIndex();
+            // 检查 follower的 index 是否在低水位之下
             if (peer.getNextIndex() < firstLogIndex) {
                 isNeedInstallSnapshot = true;
             }
@@ -211,6 +214,7 @@ public class RaftNode {
 
         LOG.debug("is need snapshot={}, peer={}", isNeedInstallSnapshot, peer.getServer().getServerId());
         if (isNeedInstallSnapshot) {
+            // 向 Peer 发送加载 Snapshot指令
             if (!installSnapshot(peer)) {
                 return;
             }
@@ -228,22 +232,35 @@ public class RaftNode {
 
         lock.lock();
         try {
+            // get first log index
             long firstLogIndex = raftLog.getFirstLogIndex();
+            // peer的下一个index，应当高于本segmentLog的最小index
             Validate.isTrue(peer.getNextIndex() >= firstLogIndex);
+            // peer 上一个写入Log的index
             prevLogIndex = peer.getNextIndex() - 1;
+            // if the log is the first one, term is 0
             long prevLogTerm;
             if (prevLogIndex == 0) {
                 prevLogTerm = 0;
             } else if (prevLogIndex == lastSnapshotIndex) {
+                // 如果刚做完 snapshot，那么直接把snapshot中的term继承过来
                 prevLogTerm = lastSnapshotTerm;
             } else {
+                // 如果这个snapshot中有Log了，就从snapshot中获取LogIndex的term
                 prevLogTerm = raftLog.getEntryTerm(prevLogIndex);
             }
+            // Leader的Id
             requestBuilder.setServerId(localServer.getServerId());
+            // Leader的Term
             requestBuilder.setTerm(currentTerm);
+            // peer 的前一条日志的Term
             requestBuilder.setPrevLogTerm(prevLogTerm);
+            // peer 的前一条日志的index
             requestBuilder.setPrevLogIndex(prevLogIndex);
+            // 打包entries，得到request中的Entry数量
             numEntries = packEntries(peer.getNextIndex(), requestBuilder);
+            // Commit的index，不能超过Leader已经commit的index，也不能超过Leader给Follower的index
+            // 即，将Leader commit的entries commit，但也不能commit Leader没有commit的entries
             requestBuilder.setCommitIndex(Math.min(commitIndex, prevLogIndex + numEntries));
         } finally {
             lock.unlock();
@@ -300,6 +317,7 @@ public class RaftNode {
             LOG.error("can't be happened");
             return;
         }
+        // if a new term is published, stop voting and become follower, reset election timer.
         if (currentTerm < newTerm) {
             currentTerm = newTerm;
             leaderId = 0;
@@ -487,7 +505,9 @@ public class RaftNode {
     /**
      * 客户端发起正式vote，对candidate有效
      */
-    private void startVote() {
+    private void
+
+    startVote() {
         lock.lock();
         try {
             if (!ConfigurationUtils.containsServer(configuration, localServer.getServerId())) {
@@ -777,6 +797,7 @@ public class RaftNode {
 
     // in lock
     private long packEntries(long nextIndex, RaftProto.AppendEntriesRequest.Builder requestBuilder) {
+        // 保证不超出每个Request中Entry的最大数量限制
         long lastIndex = Math.min(raftLog.getLastLogIndex(),
                 nextIndex + raftOptions.getMaxLogEntriesPerRequest() - 1);
         for (long index = nextIndex; index <= lastIndex; index++) {
@@ -868,17 +889,24 @@ public class RaftNode {
                 lastOffset = 0;
                 lastLength = 0;
             }
+            // get a snapshot file
             Snapshot.SnapshotDataFile lastFile = snapshotDataFileMap.get(lastFileName);
+            // get the length of snapshot file
             long lastFileLength = lastFile.randomAccessFile.length();
             String currentFileName = lastFileName;
+            // how long we have read from last snapshot file
             long currentOffset = lastOffset + lastLength;
+            // how long we need to read this time
             int currentDataSize = raftOptions.getMaxSnapshotBytesPerRequest();
             Snapshot.SnapshotDataFile currentDataFile = lastFile;
             if (lastOffset + lastLength < lastFileLength) {
+                // if last snapshot file is not read finished
                 if (lastOffset + lastLength + raftOptions.getMaxSnapshotBytesPerRequest() > lastFileLength) {
+                    // continue reading last snapshot file
                     currentDataSize = (int) (lastFileLength - (lastOffset + lastLength));
                 }
             } else {
+                // if last snapshot file is finished
                 Map.Entry<String, Snapshot.SnapshotDataFile> currentEntry
                         = snapshotDataFileMap.higherEntry(lastFileName);
                 if (currentEntry == null) {
@@ -887,12 +915,14 @@ public class RaftNode {
                 }
                 currentDataFile = currentEntry.getValue();
                 currentFileName = currentEntry.getKey();
+                // reset the offset we have read in this file
                 currentOffset = 0;
                 int currentFileLenght = (int) currentEntry.getValue().randomAccessFile.length();
                 if (currentFileLenght < raftOptions.getMaxSnapshotBytesPerRequest()) {
                     currentDataSize = currentFileLenght;
                 }
             }
+            // read buffer
             byte[] currentData = new byte[currentDataSize];
             currentDataFile.randomAccessFile.seek(currentOffset);
             currentDataFile.randomAccessFile.read(currentData);
@@ -900,6 +930,7 @@ public class RaftNode {
             requestBuilder.setFileName(currentFileName);
             requestBuilder.setOffset(currentOffset);
             requestBuilder.setIsFirst(false);
+            // if all of snapshots are finished
             if (currentFileName.equals(snapshotDataFileMap.lastKey())
                     && currentOffset + currentDataSize >= currentDataFile.randomAccessFile.length()) {
                 requestBuilder.setIsLast(true);
@@ -921,7 +952,9 @@ public class RaftNode {
 
         lock.lock();
         try {
+            // tell follower the current term
             requestBuilder.setTerm(currentTerm);
+            // tell follower who is the leader
             requestBuilder.setServerId(localServer.getServerId());
         } finally {
             lock.unlock();

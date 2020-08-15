@@ -63,6 +63,7 @@ public class SegmentedLog {
         if (startLogIndexSegmentMap.size() == 0) {
             return null;
         }
+        // 找到小于等于index的最大Segment，即包含着index的segment
         Segment segment = startLogIndexSegmentMap.floorEntry(index).getValue();
         return segment.getEntry(index);
     }

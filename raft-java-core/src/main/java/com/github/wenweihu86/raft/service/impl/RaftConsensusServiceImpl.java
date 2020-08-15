@@ -107,20 +107,26 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
             responseBuilder.setTerm(raftNode.getCurrentTerm());
             responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);
             responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());
+            // if leader's term is smaller than current term, tell leader current term and log index
             if (request.getTerm() < raftNode.getCurrentTerm()) {
                 return responseBuilder.build();
             }
+            // 首先确认当前节点退位，重置当选计时器
             raftNode.stepDown(request.getTerm());
+            // 如果当前没有Leader，则认为请求者为Leader
             if (raftNode.getLeaderId() == 0) {
                 raftNode.setLeaderId(request.getServerId());
                 LOG.info("new leaderId={}, conf={}",
                         raftNode.getLeaderId(),
                         PRINTER.printToString(raftNode.getConfiguration()));
             }
+            // 如果当前节点收到了两个不同的Leader，在同一个Term中的请求
+            // something went wrong, stop receiving logs and waiting for a new term
             if (raftNode.getLeaderId() != request.getServerId()) {
                 LOG.warn("Another peer={} declares that it is the leader " +
                                 "at term={} which was occupied by leader={}",
                         request.getServerId(), request.getTerm(), raftNode.getLeaderId());
+                // 保证退位，等待新的Term
                 raftNode.stepDown(request.getTerm() + 1);
                 responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);
                 responseBuilder.setTerm(request.getTerm() + 1);
@@ -145,6 +151,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                 return responseBuilder.build();
             }
 
+            // 如果没有entries需要添加，那就是个心跳包
             if (request.getEntriesCount() == 0) {
                 LOG.debug("heartbeat request from peer={} at term={}, my term={}",
                         request.getServerId(), request.getTerm(), raftNode.getCurrentTerm());
@@ -155,14 +162,17 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                 return responseBuilder.build();
             }
 
+            // 经过前面的判断，现在的entries应该在FirstIndex和LastIndex之间，且Term与Leader一致
             responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS);
             List<RaftProto.LogEntry> entries = new ArrayList<>();
             long index = request.getPrevLogIndex();
             for (RaftProto.LogEntry entry : request.getEntriesList()) {
                 index++;
+                // 小于当前Segment中FirstLog的index都应当是非法的，直接跳过就可以
                 if (index < raftNode.getRaftLog().getFirstLogIndex()) {
                     continue;
                 }
+                // 已经添加过的Log，就不用再加一遍了
                 if (raftNode.getRaftLog().getLastLogIndex() >= index) {
                     if (raftNode.getRaftLog().getEntryTerm(index) == entry.getTerm()) {
                         continue;
