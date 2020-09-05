@@ -63,18 +63,31 @@ public class ExampleServiceImpl implements ExampleService {
     public ExampleProto.SetResponse set(ExampleProto.SetRequest request) {
         ExampleProto.SetResponse.Builder responseBuilder = ExampleProto.SetResponse.newBuilder();
         // 如果没Leader
+        if (request.getType().equals("N")){
+            LOG.info("received Normal request!");
+        } else {
+            LOG.info("received Future requests!");
+        }
         if (raftNode.getLeaderId() <= 0) {
             responseBuilder.setSuccess(false);
             // 如果自己不是leader，将写请求转发给leader
         } else if (raftNode.getLeaderId() != raftNode.getLocalServer().getServerId()) {
             // TODO: 如果是非关键事务，则发布未来事务（是否需要增加一致性哈希）
             // 检查是否Leader已更换
-            onLeaderChangeEvent();
-            if (this.exampleService == null) {
-                this.exampleService = BrpcProxy.getProxy(leaderRpcClient, ExampleService.class);
+            if (request.getType().equals("N")) {
+                onLeaderChangeEvent();
+                if (this.exampleService == null) {
+                    this.exampleService = BrpcProxy.getProxy(leaderRpcClient, ExampleService.class);
+                }
+                ExampleProto.SetResponse responseFromLeader = exampleService.set(request);
+                responseBuilder.mergeFrom(responseFromLeader);
+            } else {
+                LOG.info("Publish new future transaction");
+                // 如果是Future data，向各节点发送数据追加请求
+                byte[] data = request.toByteArray();
+                boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA);
+                responseBuilder.setSuccess(success);
             }
-            ExampleProto.SetResponse responseFromLeader = exampleService.set(request);
-            responseBuilder.mergeFrom(responseFromLeader);
         } else {
             // 如果自己是Leader，数据同步写入raft集群
             byte[] data = request.toByteArray();

@@ -100,6 +100,76 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
 
     @Override
     public RaftProto.AppendEntriesResponse appendEntries(RaftProto.AppendEntriesRequest request) {
+        if (request.getFutureEntriesCount() != 0){
+            LOG.info("Append Future entries request received! {}", request.getFutureEntriesList());
+            raftNode.getLock().lock();
+            try{
+                RaftProto.AppendEntriesResponse.Builder responseBuilder
+                        = RaftProto.AppendEntriesResponse.newBuilder();
+                responseBuilder.setTerm(raftNode.getCurrentTerm());
+                responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_FAIL);
+                // 发布Future entries的peer很有可能不知道当前的窗口在什么位置，告诉peer当前的窗口
+                responseBuilder.setLastLogIndex(raftNode.getRaftFutureLog().getLastFutureLogIndex());
+                // Term 不对的话，还是要返回的，不能接受
+                if (request.getTerm() < raftNode.getCurrentTerm()) {
+                    return responseBuilder.build();
+                }
+                // 判断当前的请求是否在当前窗口内
+                if (request.getPrevLogIndex() < raftNode.getRaftFutureLog().getFirstLogIndex()){
+                    return responseBuilder.build();
+                }
+
+                // 只要是在同一个Term，且在一个窗口内，写入log
+                responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS);
+                List<RaftProto.LogEntry> entries = new ArrayList<>();
+                // index开始的地方
+                long index = request.getPrevLogIndex();
+                for (RaftProto.LogEntry entry : request.getFutureEntriesList()) {
+                    // 这里不会出现非窗口内的数据（理论上），所有也不会出现index小于普通Entries Index的情况
+//                    // 小于当前Segment中FirstLog的index都应当是非法的，直接跳过就可以
+//                    if (index < raftNode.getRaftLog().getFirstLogIndex()) {
+//                        continue;
+//                    }
+                    index = entry.getIndex();
+                    LOG.info("received index {} !", index);
+                    // 如果这个Entry 已经添加过了就 pass掉
+                    if (raftNode.getRaftFutureLog().getFutureLogData().containsKey(index)){
+                        continue;
+                    }
+                    // 已经添加过的Log，就不用再加一遍了
+                    // 而且不会truncate，因为Segment是定长的
+//                    if (raftNode.getRaftLog().getLastLogIndex() >= index) {
+//                        if (raftNode.getRaftLog().getEntryTerm(index) == entry.getTerm()) {
+//
+//                        }
+//                        // truncate segment log from index
+//                        long lastIndexKept = index - 1;
+//                        raftNode.getRaftLog().truncateSuffix(lastIndexKept);
+//                    }
+                    entries.add(entry);
+//                    index += raftNode.getConfiguration().getServersCount();
+                }
+                raftNode.getRaftFutureLog().appendFuture(raftNode.getConfiguration().getServersCount(),
+                        raftNode.getLocalServer().getServerId(), entries);
+//            raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(),
+//                    null, raftNode.getRaftLog().getFirstLogIndex());
+                responseBuilder.setLastLogIndex(index);
+
+                // 不要commit
+                advanceCommitFutureIndex(request);
+                LOG.info("AppendFutureEntries request from server {} " +
+                                "in term {} (my term is {}), entryCount={} resCode={}",
+                        request.getServerId(), request.getTerm(), raftNode.getCurrentTerm(),
+                        request.getEntriesCount(), responseBuilder.getResCode());
+                return responseBuilder.build();
+
+            } catch (Exception e){
+                e.printStackTrace();
+            } finally {
+                raftNode.getLock().unlock();
+            }
+        }
+        // 如果是Leader发来的请求，则在commit和apply的时候，检查是否包含了Future entries追加请求
         raftNode.getLock().lock();
         try {
             RaftProto.AppendEntriesResponse.Builder responseBuilder
@@ -317,6 +387,31 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
 
         return responseBuilder.build();
     }
+
+    // 事实上这里只是将收到的Future Log index 记录到 metadata中，并不是commit到state db中，
+    // TODO: 先这样，用的时候再说
+    private void advanceCommitFutureIndex(RaftProto.AppendEntriesRequest request) {
+        long newCommitIndex = Math.max(raftNode.getRaftFutureLog().getFutureLogData().lastKey(),
+                request.getPrevLogIndex()+ request.getEntriesCount());
+//        raftNode.setCommitIndex(newCommitIndex);
+        raftNode.getRaftFutureLog().updateMetaData(null,null, null, newCommitIndex);
+//        if (raftNode.getLastAppliedIndex() < raftNode.getCommitIndex()) {
+//            // apply state machine
+//            for (long index = raftNode.getLastAppliedIndex() + 1;
+//                 index <= raftNode.getCommitIndex(); index++) {
+//                RaftProto.LogEntry entry = raftNode.getRaftLog().getEntry(index);
+//                if (entry != null) {
+//                    if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {
+//                        raftNode.getStateMachine().apply(entry.getData().toByteArray());
+//                    } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
+//                        raftNode.applyConfiguration(entry);
+//                    }
+//                }
+//                raftNode.setLastAppliedIndex(index);
+//            }
+//        }
+    }
+
 
     // in lock, for follower
     private void advanceCommitIndex(RaftProto.AppendEntriesRequest request) {

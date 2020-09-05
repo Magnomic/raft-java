@@ -17,6 +17,10 @@ public class Peer {
     private long nextIndex;
     // 已复制日志的最高索引值
     private long matchIndex;
+    // 需要发送给节点的下一条Future Entry的index，应当为发布节点的Node ID倍数
+    private long nextFutureIndex;
+    // 已经复制给节点的Future Entry的index，应当为发布节点的Node ID倍数
+    private long matchFutureIndex;
     private volatile Boolean voteGranted;
     private volatile boolean isCatchUp;
 
@@ -79,5 +83,21 @@ public class Peer {
 
     public void setCatchUp(boolean catchUp) {
         isCatchUp = catchUp;
+    }
+
+    public long getNextFutureIndex() {
+        return nextFutureIndex;
+    }
+
+    public void setNextFutureIndex(long nextFutureIndex) {
+        this.nextFutureIndex = nextFutureIndex;
+    }
+
+    public long getMatchFutureIndex() {
+        return matchFutureIndex;
+    }
+
+    public void setMatchFutureIndex(long matchFutureIndex) {
+        this.matchFutureIndex = matchFutureIndex;
     }
 }

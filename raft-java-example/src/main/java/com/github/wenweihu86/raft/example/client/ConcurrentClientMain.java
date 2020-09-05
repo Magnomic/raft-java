@@ -28,13 +28,13 @@ public class ConcurrentClientMain {
         RpcClient rpcClient = new RpcClient(ipPorts);
         ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);
 
-        ExecutorService readThreadPool = Executors.newFixedThreadPool(30);
-        ExecutorService writeThreadPool = Executors.newFixedThreadPool(30);
-        Future<?>[] future = new Future[30];
-        for (int i = 0; i < 30; i++) {
+        ExecutorService readThreadPool = Executors.newFixedThreadPool(10);
+        ExecutorService writeThreadPool = Executors.newFixedThreadPool(10);
+        Future<?>[] future = new Future[10];
+        for (int i = 0; i < 3; i++) {
             future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool));
         }
-        Thread.sleep(1000000L);
+        Thread.sleep(10000L);
     }
 
     public static class SetTask implements Runnable {
@@ -48,25 +48,25 @@ public class ConcurrentClientMain {
 
         @Override
         public void run() {
-            for (int i=0;i<100;i++) {
+            for (int i=0;i<2;i++) {
                 String key = UUID.randomUUID().toString();
                 String value = UUID.randomUUID().toString();
                 ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()
-                        .setKey(key).setValue(value).build();
+                        .setKey(key).setValue(value).setType(i % 2 == 0? "F": "N").build();
 
                 long startTime = System.currentTimeMillis();
                 ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
-                try {
-                    if (setResponse != null) {
-                        System.out.printf("set request, key=%s, value=%s, response=%s, elapseMS=%d\n",
-                                key, value, jsonFormat.printToString(setResponse), System.currentTimeMillis() - startTime);
-                        readThreadPool.submit(new GetTask(exampleService, key));
-                    } else {
-                        System.out.printf("set request failed, key=%s value=%s\n", key, value);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+//                try {
+//                    if (setResponse != null) {
+//                        System.out.printf("set request, key=%s, value=%s, response=%s, elapseMS=%d\n",
+//                                key, value, jsonFormat.printToString(setResponse), System.currentTimeMillis() - startTime);
+//                        readThreadPool.submit(new GetTask(exampleService, key));
+//                    } else {
+//                        System.out.printf("set request failed, key=%s value=%s\n", key, value);
+//                    }
+//                } catch (Exception ex) {
+//                    ex.printStackTrace();
+//                }
             }
         }
     }

@@ -4,12 +4,22 @@ import com.github.wenweihu86.raft.proto.RaftProto;
 
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wenweihu86 on 2017/5/3.
  */
 public class Segment {
+
+    public Map<Long, Record> getFutureEntries() {
+        return futureEntries;
+    }
+
+    public void setFutureEntries(Map<Long, Record> futureEntries) {
+        this.futureEntries = futureEntries;
+    }
 
     public static class Record {
         public long offset;
@@ -20,6 +30,8 @@ public class Segment {
         }
     }
 
+    public static long fixedWindowSize = 100;
+    private long futureEndIndex;
     private boolean canWrite;
     private long startIndex;
     private long endIndex;
@@ -27,6 +39,7 @@ public class Segment {
     private String fileName;
     private RandomAccessFile randomAccessFile;
     private List<Record> entries = new ArrayList<>();
+    private Map<Long, Record> futureEntries = new HashMap<Long, Record>((int) fixedWindowSize);
 
     public RaftProto.LogEntry getEntry(long index) {
         if (startIndex == 0 || endIndex == 0) {
@@ -37,6 +50,11 @@ public class Segment {
         }
         int indexInList = (int) (index - startIndex);
         return entries.get(indexInList).entry;
+    }
+
+    public RaftProto.LogEntry getFutureEntry(long index) {
+        if (futureEntries.get(index) == null) return null;
+        return futureEntries.get(index).entry;
     }
 
     public boolean isCanWrite() {
@@ -57,6 +75,18 @@ public class Segment {
 
     public long getEndIndex() {
         return endIndex;
+    }
+
+    public long getFutureSegmentEndIndex(int serverId){
+        return futureEndIndex;
+    }
+
+    public long getFixedWindowSize() {
+        return fixedWindowSize;
+    }
+
+    public void setFixedWindowSize(long fixedWindowSize) {
+        this.fixedWindowSize = fixedWindowSize;
     }
 
     public void setEndIndex(long endIndex) {

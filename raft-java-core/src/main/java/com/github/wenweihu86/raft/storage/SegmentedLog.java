@@ -10,9 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Created by wenweihu86 on 2017/5/3.
@@ -26,17 +24,20 @@ public class SegmentedLog {
     private int maxSegmentFileSize;
     private RaftProto.LogMetaData metaData;
     private TreeMap<Long, Segment> startLogIndexSegmentMap = new TreeMap<>();
+    private TreeMap<Long, Segment> startFutureLogIndexSegmentMap = new TreeMap<>();
+    private TreeMap<Long, RaftProto.LogEntry> futureLogData = new TreeMap<>();
     // segment log占用的内存大小，用于判断是否需要做snapshot
     private volatile long totalSize;
 
-    public SegmentedLog(String raftDataDir, int maxSegmentFileSize) {
-        this.logDir = raftDataDir + File.separator + "log";
+    public SegmentedLog(String raftDataDir, String type, int maxSegmentFileSize) {
+        this.logDir = raftDataDir + File.separator + "log" + type;
         this.logDataDir = logDir + File.separator + "data";
         this.maxSegmentFileSize = maxSegmentFileSize;
         File file = new File(logDataDir);
         if (!file.exists()) {
             file.mkdirs();
         }
+        LOG.info(file.getAbsolutePath());
         readSegments();
         for (Segment segment : startLogIndexSegmentMap.values()) {
             this.loadSegmentData(segment);
@@ -46,9 +47,13 @@ public class SegmentedLog {
         if (metaData == null) {
             if (startLogIndexSegmentMap.size() > 0) {
                 LOG.error("No readable metadata file but found segments in {}", logDir);
-                throw new RuntimeException("No readable metadata file but found segments");
+//                throw new RuntimeException("No readable metadata file but found segments");
             }
-            metaData = RaftProto.LogMetaData.newBuilder().setFirstLogIndex(1).build();
+            if ("future".equals(type)) {
+                metaData = RaftProto.LogMetaData.newBuilder().setFirstLogIndex(Segment.fixedWindowSize).build();
+            } else {
+                metaData = RaftProto.LogMetaData.newBuilder().setFirstLogIndex(1).build();
+            }
         }
     }
 
@@ -66,6 +71,26 @@ public class SegmentedLog {
         // 找到小于等于index的最大Segment，即包含着index的segment
         Segment segment = startLogIndexSegmentMap.floorEntry(index).getValue();
         return segment.getEntry(index);
+    }
+
+    public RaftProto.LogEntry getFutureEntry(long index) {
+        long firstLogIndex = getFirstLogIndex();
+        long lastLogIndex = getLastFutureLogIndex();
+        LOG.info("index range: index={}, firstLogIndex={}, lastLogIndex={}",
+                index, firstLogIndex, lastLogIndex);
+        if (index == 0 || index < firstLogIndex || index > lastLogIndex) {
+            LOG.info("index out of range, index={}, firstLogIndex={}, lastLogIndex={}",
+                    index, firstLogIndex, lastLogIndex);
+            return null;
+        }
+        if (startFutureLogIndexSegmentMap.size() == 0) {
+            LOG.info("Future segment map is null!!!");
+            return null;
+        }
+        // 找到小于等于index的最大Segment，即包含着index的segment
+        Segment segment = startFutureLogIndexSegmentMap.floorEntry(index).getValue();
+        LOG.info("This is all of my entries! {}", segment.getFutureEntries());
+        return segment.getFutureEntry(index);
     }
 
     public long getEntryTerm(long index) {
@@ -89,6 +114,122 @@ public class SegmentedLog {
         }
         Segment lastSegment = startLogIndexSegmentMap.lastEntry().getValue();
         return lastSegment.getEndIndex();
+    }
+
+    public long getLastFutureLogIndex() {
+        // 有两种情况segment为空
+        // 1、第一次初始化，firstLogIndex = 1，lastLogIndex = 0
+        // 2、snapshot刚完成，日志正好被清理掉，firstLogIndex = snapshotIndex + 1， lastLogIndex = snapshotIndex
+        if (startFutureLogIndexSegmentMap.size() == 0) {
+            return getFirstLogIndex() - 1;
+        }
+        Segment lastSegment = startFutureLogIndexSegmentMap.lastEntry().getValue();
+        return lastSegment.getEndIndex();
+    }
+
+    public long appendFuture(int size, int serverId, List<RaftProto.LogEntry> entries){
+//        if (startLogIndexSegmentMap.size() ==0){
+//            return getFirstLogIndex() - 1;
+//        }
+        long newLastLogIndex =  0;
+        LOG.info("appendFuture invoked! Entries size is {}, server size is {}, server id is {}", entries.size(), size, serverId);
+        // TODO: 如果接受到了Fixed Window Size的整数倍Index，则创建新的Segment，关闭旧的Segment
+        if (futureLogData.size() ==0){
+            newLastLogIndex = Segment.fixedWindowSize - 1;
+            // 向上取整周期并+server id
+            newLastLogIndex = newLastLogIndex + size - (newLastLogIndex % size) + serverId;
+        } else {
+            // 由于自己发布的index自己是知道的，且周期性增加index，即使不知道其他节点发布的最新index，也不会产生冲突
+//            for (Map.Entry<Long, RaftProto.LogEntry> entry : futureLogData.entrySet()){
+//                LOG.info("key : {}, value : {}", entry.getKey(), entry.getValue());
+//            }
+            // 获取本Segment当中，对应本serverId的待插入index
+            // TODO: 在插入Future index时，将对应的serverId的LastIndex更新
+            newLastLogIndex = getLastFutureLogIndex();
+            LOG.info("old newLastLogIndex is {}", newLastLogIndex);
+        }
+        for (RaftProto.LogEntry entry : entries) {
+            // 如果没有index， 那么说明是自己添加的， 分配 index
+            if (entry.getIndex() == 0){
+                // 保证Server间提交的index不冲突
+                newLastLogIndex += size;
+            } else {
+                newLastLogIndex = entry.getIndex();
+            }
+
+            int entrySize = entry.getSerializedSize();
+            int newSegmentStartIndex = 0;
+            int segmentSize = startFutureLogIndexSegmentMap.size();
+            boolean isNeedNewSegmentFile = false;
+            long lastEndIndex = Segment.fixedWindowSize - 1;
+            try {
+                if (segmentSize == 0) {
+                    isNeedNewSegmentFile = true;
+                } else {
+                    Segment segment = startFutureLogIndexSegmentMap.lastEntry().getValue();
+                    if (!segment.isCanWrite()) {
+                        isNeedNewSegmentFile = true;
+                        // TODO: 拟不设置最大文件上限，只以Index作为Future Segment的截断标准
+//                    } else if (segment.getFileSize() + entrySize >= maxSegmentFileSize) {
+                    } else if (segment.getEndIndex() - newLastLogIndex > Segment.fixedWindowSize) {
+                        // 已经超出窗口，最后的
+                        lastEndIndex = segment.getEndIndex();
+                        isNeedNewSegmentFile = true;
+                        // 最后一个segment的文件close并改名
+                        segment.getRandomAccessFile().close();
+                        segment.setCanWrite(false);
+                        String newFileName = String.format("Future-%020d-%020d",
+                                segment.getStartIndex(), segment.getEndIndex());
+                        String newFullFileName = logDataDir + File.separator + newFileName;
+                        File newFile = new File(newFullFileName);
+                        String oldFullFileName = logDataDir + File.separator + segment.getFileName();
+                        File oldFile = new File(oldFullFileName);
+                        FileUtils.moveFile(oldFile, newFile);
+                        segment.setFileName(newFileName);
+                        segment.setRandomAccessFile(RaftFileUtils.openFile(logDataDir, newFileName, "r"));
+                    }
+                }
+                Segment newSegment;
+                // 新建segment文件
+                if (isNeedNewSegmentFile) {
+                    // open new segment file
+                    String newSegmentFileName = String.format("open-%d", newLastLogIndex - (newLastLogIndex % Segment.fixedWindowSize));
+                    String newFullFileName = logDataDir + File.separator + newSegmentFileName;
+                    File newSegmentFile = new File(newFullFileName);
+                    if (!newSegmentFile.exists()) {
+                        newSegmentFile.createNewFile();
+                    }
+                    Segment segment = new Segment();
+                    segment.setCanWrite(true);
+                    segment.setStartIndex(lastEndIndex + 1);
+                    segment.setEndIndex(0);
+                    segment.setFileName(newSegmentFileName);
+                    segment.setRandomAccessFile(RaftFileUtils.openFile(logDataDir, newSegmentFileName, "rw"));
+                    newSegment = segment;
+                } else {
+                    newSegment = startFutureLogIndexSegmentMap.lastEntry().getValue();
+                }
+                // 写index到entry中
+                if (entry.getIndex() == 0) {
+                    entry = RaftProto.LogEntry.newBuilder(entry)
+                            .setIndex(newLastLogIndex).build();
+                }
+                newSegment.setEndIndex(Math.max(newSegment.getEndIndex(), entry.getIndex()));
+                newSegment.getFutureEntries().put(entry.getIndex(), new Segment.Record(
+                        newSegment.getRandomAccessFile().getFilePointer(), entry));
+                RaftFileUtils.writeProtoToFile(newSegment.getRandomAccessFile(), entry);
+                newSegment.setFileSize(newSegment.getRandomAccessFile().length());
+                if (!startFutureLogIndexSegmentMap.containsKey(newSegment.getStartIndex())) {
+                    startFutureLogIndexSegmentMap.put(newSegment.getStartIndex(), newSegment);
+                }
+                LOG.info("I putLog Index {} to newLastLogIndex", entry.getIndex());
+                futureLogData.put(entry.getIndex(), entry);
+                totalSize += entrySize;
+            }  catch (IOException ex) {
+                throw new RuntimeException("append raft log exception, msg=" + ex.getMessage());
+            }
+        }
+        return newLastLogIndex;
     }
 
     public long append(List<RaftProto.LogEntry> entries) {
@@ -360,4 +501,11 @@ public class SegmentedLog {
         return totalSize;
     }
 
+    public TreeMap<Long, RaftProto.LogEntry> getFutureLogData() {
+        return futureLogData;
+    }
+
+    public void setFutureLogData(TreeMap<Long, RaftProto.LogEntry> futureLogData) {
+        this.futureLogData = futureLogData;
+    }
 }

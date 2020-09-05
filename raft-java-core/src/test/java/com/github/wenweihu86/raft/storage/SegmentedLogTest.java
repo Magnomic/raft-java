@@ -19,7 +19,7 @@ public class SegmentedLogTest {
     @Test
     public void testTruncateSuffix() throws IOException {
         String raftDataDir = "./data";
-        SegmentedLog segmentedLog = new SegmentedLog(raftDataDir, 32);
+        SegmentedLog segmentedLog = new SegmentedLog(raftDataDir, "", 32);
         Assert.assertTrue(segmentedLog.getFirstLogIndex() == 1);
 
         List<RaftProto.LogEntry> entries = new ArrayList<>();

@@ -19,7 +19,7 @@ public final class ExampleProto {
     /**
      * <code>optional string key = 1;</code>
      */
-    java.lang.String getKey();
+    String getKey();
     /**
      * <code>optional string key = 1;</code>
      */
@@ -34,12 +34,27 @@ public final class ExampleProto {
     /**
      * <code>optional string value = 2;</code>
      */
-    java.lang.String getValue();
+    String getValue();
     /**
      * <code>optional string value = 2;</code>
      */
     com.google.protobuf.ByteString
         getValueBytes();
+
+    // optional string type = 3;
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    boolean hasType();
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    String getType();
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getTypeBytes();
   }
   /**
    * Protobuf type {@code service.SetRequest}
@@ -64,7 +79,7 @@ public final class ExampleProto {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
+    @Override
     public final com.google.protobuf.UnknownFieldSet
         getUnknownFields() {
       return this.unknownFields;
@@ -102,6 +117,11 @@ public final class ExampleProto {
               value_ = input.readBytes();
               break;
             }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              type_ = input.readBytes();
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -116,14 +136,14 @@ public final class ExampleProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetRequest_descriptor;
+      return ExampleProto.internal_static_service_SetRequest_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetRequest_fieldAccessorTable
+      return ExampleProto.internal_static_service_SetRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest.Builder.class);
+              SetRequest.class, Builder.class);
     }
 
     public static com.google.protobuf.Parser<SetRequest> PARSER =
@@ -136,7 +156,7 @@ public final class ExampleProto {
       }
     };
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Parser<SetRequest> getParserForType() {
       return PARSER;
     }
@@ -144,7 +164,7 @@ public final class ExampleProto {
     private int bitField0_;
     // optional string key = 1;
     public static final int KEY_FIELD_NUMBER = 1;
-    private java.lang.Object key_;
+    private Object key_;
     /**
      * <code>optional string key = 1;</code>
      */
@@ -154,14 +174,14 @@ public final class ExampleProto {
     /**
      * <code>optional string key = 1;</code>
      */
-    public java.lang.String getKey() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+    public String getKey() {
+      Object ref = key_;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           key_ = s;
         }
@@ -173,11 +193,11 @@ public final class ExampleProto {
      */
     public com.google.protobuf.ByteString
         getKeyBytes() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
+      Object ref = key_;
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         key_ = b;
         return b;
       } else {
@@ -187,7 +207,7 @@ public final class ExampleProto {
 
     // optional string value = 2;
     public static final int VALUE_FIELD_NUMBER = 2;
-    private java.lang.Object value_;
+    private Object value_;
     /**
      * <code>optional string value = 2;</code>
      */
@@ -197,14 +217,14 @@ public final class ExampleProto {
     /**
      * <code>optional string value = 2;</code>
      */
-    public java.lang.String getValue() {
-      java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+    public String getValue() {
+      Object ref = value_;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           value_ = s;
         }
@@ -216,12 +236,55 @@ public final class ExampleProto {
      */
     public com.google.protobuf.ByteString
         getValueBytes() {
-      java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
+      Object ref = value_;
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         value_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // optional string type = 3;
+    public static final int TYPE_FIELD_NUMBER = 3;
+    private Object type_;
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    public boolean hasType() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    public String getType() {
+      Object ref = type_;
+      if (ref instanceof String) {
+        return (String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          type_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string type = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTypeBytes() {
+      Object ref = type_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (String) ref);
+        type_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -231,6 +294,7 @@ public final class ExampleProto {
     private void initFields() {
       key_ = "";
       value_ = "";
+      type_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -250,6 +314,9 @@ public final class ExampleProto {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeBytes(2, getValueBytes());
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getTypeBytes());
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -267,65 +334,69 @@ public final class ExampleProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(2, getValueBytes());
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, getTypeBytes());
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
       return size;
     }
 
     private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
+    @Override
+    protected Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(
+    public static SetRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(
+    public static SetRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(byte[] data)
+    public static SetRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(
+    public static SetRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(java.io.InputStream input)
+    public static SetRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(
+    public static SetRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseDelimitedFrom(java.io.InputStream input)
+    public static SetRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseDelimitedFrom(
+    public static SetRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(
+    public static SetRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parseFrom(
+    public static SetRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -334,14 +405,14 @@ public final class ExampleProto {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest prototype) {
+    public static Builder newBuilder(SetRequest prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
 
-    @java.lang.Override
+    @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -350,17 +421,17 @@ public final class ExampleProto {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequestOrBuilder {
+       implements SetRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetRequest_descriptor;
+        return ExampleProto.internal_static_service_SetRequest_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetRequest_fieldAccessorTable
+        return ExampleProto.internal_static_service_SetRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest.Builder.class);
+                SetRequest.class, Builder.class);
       }
 
       // Construct using com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest.newBuilder()
@@ -369,7 +440,7 @@ public final class ExampleProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -387,6 +458,8 @@ public final class ExampleProto {
         bitField0_ = (bitField0_ & ~0x00000001);
         value_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
+        type_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -396,23 +469,23 @@ public final class ExampleProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetRequest_descriptor;
+        return ExampleProto.internal_static_service_SetRequest_descriptor;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest getDefaultInstanceForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest.getDefaultInstance();
+      public SetRequest getDefaultInstanceForType() {
+        return SetRequest.getDefaultInstance();
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest build() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest result = buildPartial();
+      public SetRequest build() {
+        SetRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest buildPartial() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest result = new com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest(this);
+      public SetRequest buildPartial() {
+        SetRequest result = new SetRequest(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -423,22 +496,26 @@ public final class ExampleProto {
           to_bitField0_ |= 0x00000002;
         }
         result.value_ = value_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.type_ = type_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest) {
-          return mergeFrom((com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest)other);
+        if (other instanceof SetRequest) {
+          return mergeFrom((SetRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest other) {
-        if (other == com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(SetRequest other) {
+        if (other == SetRequest.getDefaultInstance()) return this;
         if (other.hasKey()) {
           bitField0_ |= 0x00000001;
           key_ = other.key_;
@@ -447,6 +524,11 @@ public final class ExampleProto {
         if (other.hasValue()) {
           bitField0_ |= 0x00000002;
           value_ = other.value_;
+          onChanged();
+        }
+        if (other.hasType()) {
+          bitField0_ |= 0x00000004;
+          type_ = other.type_;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -461,11 +543,11 @@ public final class ExampleProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest parsedMessage = null;
+        SetRequest parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.github.wenweihu86.raft.example.server.service.ExampleProto.SetRequest) e.getUnfinishedMessage();
+          parsedMessage = (SetRequest) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -477,7 +559,7 @@ public final class ExampleProto {
       private int bitField0_;
 
       // optional string key = 1;
-      private java.lang.Object key_ = "";
+      private Object key_ = "";
       /**
        * <code>optional string key = 1;</code>
        */
@@ -487,15 +569,15 @@ public final class ExampleProto {
       /**
        * <code>optional string key = 1;</code>
        */
-      public java.lang.String getKey() {
-        java.lang.Object ref = key_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+      public String getKey() {
+        Object ref = key_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref)
               .toStringUtf8();
           key_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
       /**
@@ -503,11 +585,11 @@ public final class ExampleProto {
        */
       public com.google.protobuf.ByteString
           getKeyBytes() {
-        java.lang.Object ref = key_;
+        Object ref = key_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+                  (String) ref);
           key_ = b;
           return b;
         } else {
@@ -518,7 +600,7 @@ public final class ExampleProto {
        * <code>optional string key = 1;</code>
        */
       public Builder setKey(
-          java.lang.String value) {
+          String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -551,7 +633,7 @@ public final class ExampleProto {
       }
 
       // optional string value = 2;
-      private java.lang.Object value_ = "";
+      private Object value_ = "";
       /**
        * <code>optional string value = 2;</code>
        */
@@ -561,15 +643,15 @@ public final class ExampleProto {
       /**
        * <code>optional string value = 2;</code>
        */
-      public java.lang.String getValue() {
-        java.lang.Object ref = value_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+      public String getValue() {
+        Object ref = value_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref)
               .toStringUtf8();
           value_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
       /**
@@ -577,11 +659,11 @@ public final class ExampleProto {
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
-        java.lang.Object ref = value_;
+        Object ref = value_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+                  (String) ref);
           value_ = b;
           return b;
         } else {
@@ -592,7 +674,7 @@ public final class ExampleProto {
        * <code>optional string value = 2;</code>
        */
       public Builder setValue(
-          java.lang.String value) {
+          String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -620,6 +702,80 @@ public final class ExampleProto {
   }
   bitField0_ |= 0x00000002;
         value_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional string type = 3;
+      private Object type_ = "";
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public boolean hasType() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public String getType() {
+        Object ref = type_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          type_ = s;
+          return s;
+        } else {
+          return (String) ref;
+        }
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTypeBytes() {
+        Object ref = type_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (String) ref);
+          type_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public Builder setType(
+          String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        type_ = getDefaultInstance().getType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string type = 3;</code>
+       */
+      public Builder setTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        type_ = value;
         onChanged();
         return this;
       }
@@ -671,7 +827,7 @@ public final class ExampleProto {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
+    @Override
     public final com.google.protobuf.UnknownFieldSet
         getUnknownFields() {
       return this.unknownFields;
@@ -718,14 +874,14 @@ public final class ExampleProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetResponse_descriptor;
+      return ExampleProto.internal_static_service_SetResponse_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetResponse_fieldAccessorTable
+      return ExampleProto.internal_static_service_SetResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse.Builder.class);
+              SetResponse.class, Builder.class);
     }
 
     public static com.google.protobuf.Parser<SetResponse> PARSER =
@@ -738,7 +894,7 @@ public final class ExampleProto {
       }
     };
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Parser<SetResponse> getParserForType() {
       return PARSER;
     }
@@ -797,59 +953,59 @@ public final class ExampleProto {
     }
 
     private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
+    @Override
+    protected Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(
+    public static SetResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(
+    public static SetResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(byte[] data)
+    public static SetResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(
+    public static SetResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(java.io.InputStream input)
+    public static SetResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(
+    public static SetResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseDelimitedFrom(java.io.InputStream input)
+    public static SetResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseDelimitedFrom(
+    public static SetResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(
+    public static SetResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parseFrom(
+    public static SetResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -858,14 +1014,14 @@ public final class ExampleProto {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse prototype) {
+    public static Builder newBuilder(SetResponse prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
 
-    @java.lang.Override
+    @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -874,17 +1030,17 @@ public final class ExampleProto {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponseOrBuilder {
+       implements SetResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetResponse_descriptor;
+        return ExampleProto.internal_static_service_SetResponse_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetResponse_fieldAccessorTable
+        return ExampleProto.internal_static_service_SetResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse.Builder.class);
+                SetResponse.class, Builder.class);
       }
 
       // Construct using com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse.newBuilder()
@@ -893,7 +1049,7 @@ public final class ExampleProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -918,23 +1074,23 @@ public final class ExampleProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_SetResponse_descriptor;
+        return ExampleProto.internal_static_service_SetResponse_descriptor;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse getDefaultInstanceForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse.getDefaultInstance();
+      public SetResponse getDefaultInstanceForType() {
+        return SetResponse.getDefaultInstance();
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse build() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse result = buildPartial();
+      public SetResponse build() {
+        SetResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse buildPartial() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse result = new com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse(this);
+      public SetResponse buildPartial() {
+        SetResponse result = new SetResponse(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -947,16 +1103,16 @@ public final class ExampleProto {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse) {
-          return mergeFrom((com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse)other);
+        if (other instanceof SetResponse) {
+          return mergeFrom((SetResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse other) {
-        if (other == com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(SetResponse other) {
+        if (other == SetResponse.getDefaultInstance()) return this;
         if (other.hasSuccess()) {
           setSuccess(other.getSuccess());
         }
@@ -972,11 +1128,11 @@ public final class ExampleProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse parsedMessage = null;
+        SetResponse parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.github.wenweihu86.raft.example.server.service.ExampleProto.SetResponse) e.getUnfinishedMessage();
+          parsedMessage = (SetResponse) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -1042,7 +1198,7 @@ public final class ExampleProto {
     /**
      * <code>optional string key = 1;</code>
      */
-    java.lang.String getKey();
+    String getKey();
     /**
      * <code>optional string key = 1;</code>
      */
@@ -1072,7 +1228,7 @@ public final class ExampleProto {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
+    @Override
     public final com.google.protobuf.UnknownFieldSet
         getUnknownFields() {
       return this.unknownFields;
@@ -1119,14 +1275,14 @@ public final class ExampleProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetRequest_descriptor;
+      return ExampleProto.internal_static_service_GetRequest_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetRequest_fieldAccessorTable
+      return ExampleProto.internal_static_service_GetRequest_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest.Builder.class);
+              GetRequest.class, Builder.class);
     }
 
     public static com.google.protobuf.Parser<GetRequest> PARSER =
@@ -1139,7 +1295,7 @@ public final class ExampleProto {
       }
     };
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Parser<GetRequest> getParserForType() {
       return PARSER;
     }
@@ -1147,7 +1303,7 @@ public final class ExampleProto {
     private int bitField0_;
     // optional string key = 1;
     public static final int KEY_FIELD_NUMBER = 1;
-    private java.lang.Object key_;
+    private Object key_;
     /**
      * <code>optional string key = 1;</code>
      */
@@ -1157,14 +1313,14 @@ public final class ExampleProto {
     /**
      * <code>optional string key = 1;</code>
      */
-    public java.lang.String getKey() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+    public String getKey() {
+      Object ref = key_;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           key_ = s;
         }
@@ -1176,11 +1332,11 @@ public final class ExampleProto {
      */
     public com.google.protobuf.ByteString
         getKeyBytes() {
-      java.lang.Object ref = key_;
-      if (ref instanceof java.lang.String) {
+      Object ref = key_;
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         key_ = b;
         return b;
       } else {
@@ -1225,59 +1381,59 @@ public final class ExampleProto {
     }
 
     private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
+    @Override
+    protected Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(
+    public static GetRequest parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(
+    public static GetRequest parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(byte[] data)
+    public static GetRequest parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(
+    public static GetRequest parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(java.io.InputStream input)
+    public static GetRequest parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(
+    public static GetRequest parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseDelimitedFrom(java.io.InputStream input)
+    public static GetRequest parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseDelimitedFrom(
+    public static GetRequest parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(
+    public static GetRequest parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parseFrom(
+    public static GetRequest parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1286,14 +1442,14 @@ public final class ExampleProto {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest prototype) {
+    public static Builder newBuilder(GetRequest prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
 
-    @java.lang.Override
+    @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -1302,17 +1458,17 @@ public final class ExampleProto {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequestOrBuilder {
+       implements GetRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetRequest_descriptor;
+        return ExampleProto.internal_static_service_GetRequest_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetRequest_fieldAccessorTable
+        return ExampleProto.internal_static_service_GetRequest_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest.Builder.class);
+                GetRequest.class, Builder.class);
       }
 
       // Construct using com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest.newBuilder()
@@ -1321,7 +1477,7 @@ public final class ExampleProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -1346,23 +1502,23 @@ public final class ExampleProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetRequest_descriptor;
+        return ExampleProto.internal_static_service_GetRequest_descriptor;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest getDefaultInstanceForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest.getDefaultInstance();
+      public GetRequest getDefaultInstanceForType() {
+        return GetRequest.getDefaultInstance();
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest build() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest result = buildPartial();
+      public GetRequest build() {
+        GetRequest result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest buildPartial() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest result = new com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest(this);
+      public GetRequest buildPartial() {
+        GetRequest result = new GetRequest(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1375,16 +1531,16 @@ public final class ExampleProto {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest) {
-          return mergeFrom((com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest)other);
+        if (other instanceof GetRequest) {
+          return mergeFrom((GetRequest)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest other) {
-        if (other == com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest.getDefaultInstance()) return this;
+      public Builder mergeFrom(GetRequest other) {
+        if (other == GetRequest.getDefaultInstance()) return this;
         if (other.hasKey()) {
           bitField0_ |= 0x00000001;
           key_ = other.key_;
@@ -1402,11 +1558,11 @@ public final class ExampleProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest parsedMessage = null;
+        GetRequest parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.github.wenweihu86.raft.example.server.service.ExampleProto.GetRequest) e.getUnfinishedMessage();
+          parsedMessage = (GetRequest) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -1418,7 +1574,7 @@ public final class ExampleProto {
       private int bitField0_;
 
       // optional string key = 1;
-      private java.lang.Object key_ = "";
+      private Object key_ = "";
       /**
        * <code>optional string key = 1;</code>
        */
@@ -1428,15 +1584,15 @@ public final class ExampleProto {
       /**
        * <code>optional string key = 1;</code>
        */
-      public java.lang.String getKey() {
-        java.lang.Object ref = key_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+      public String getKey() {
+        Object ref = key_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref)
               .toStringUtf8();
           key_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
       /**
@@ -1444,11 +1600,11 @@ public final class ExampleProto {
        */
       public com.google.protobuf.ByteString
           getKeyBytes() {
-        java.lang.Object ref = key_;
+        Object ref = key_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+                  (String) ref);
           key_ = b;
           return b;
         } else {
@@ -1459,7 +1615,7 @@ public final class ExampleProto {
        * <code>optional string key = 1;</code>
        */
       public Builder setKey(
-          java.lang.String value) {
+          String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -1513,7 +1669,7 @@ public final class ExampleProto {
     /**
      * <code>optional string value = 1;</code>
      */
-    java.lang.String getValue();
+    String getValue();
     /**
      * <code>optional string value = 1;</code>
      */
@@ -1543,7 +1699,7 @@ public final class ExampleProto {
     }
 
     private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
+    @Override
     public final com.google.protobuf.UnknownFieldSet
         getUnknownFields() {
       return this.unknownFields;
@@ -1590,14 +1746,14 @@ public final class ExampleProto {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetResponse_descriptor;
+      return ExampleProto.internal_static_service_GetResponse_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+    protected FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetResponse_fieldAccessorTable
+      return ExampleProto.internal_static_service_GetResponse_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse.Builder.class);
+              GetResponse.class, Builder.class);
     }
 
     public static com.google.protobuf.Parser<GetResponse> PARSER =
@@ -1610,7 +1766,7 @@ public final class ExampleProto {
       }
     };
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Parser<GetResponse> getParserForType() {
       return PARSER;
     }
@@ -1618,7 +1774,7 @@ public final class ExampleProto {
     private int bitField0_;
     // optional string value = 1;
     public static final int VALUE_FIELD_NUMBER = 1;
-    private java.lang.Object value_;
+    private Object value_;
     /**
      * <code>optional string value = 1;</code>
      */
@@ -1628,14 +1784,14 @@ public final class ExampleProto {
     /**
      * <code>optional string value = 1;</code>
      */
-    public java.lang.String getValue() {
-      java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
+    public String getValue() {
+      Object ref = value_;
+      if (ref instanceof String) {
+        return (String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
+        String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
           value_ = s;
         }
@@ -1647,11 +1803,11 @@ public final class ExampleProto {
      */
     public com.google.protobuf.ByteString
         getValueBytes() {
-      java.lang.Object ref = value_;
-      if (ref instanceof java.lang.String) {
+      Object ref = value_;
+      if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
+                (String) ref);
         value_ = b;
         return b;
       } else {
@@ -1696,59 +1852,59 @@ public final class ExampleProto {
     }
 
     private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
+    @Override
+    protected Object writeReplace()
         throws java.io.ObjectStreamException {
       return super.writeReplace();
     }
 
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(
+    public static GetResponse parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(
+    public static GetResponse parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(byte[] data)
+    public static GetResponse parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(
+    public static GetResponse parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(java.io.InputStream input)
+    public static GetResponse parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(
+    public static GetResponse parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseDelimitedFrom(java.io.InputStream input)
+    public static GetResponse parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseDelimitedFrom(
+    public static GetResponse parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(
+    public static GetResponse parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parseFrom(
+    public static GetResponse parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -1757,14 +1913,14 @@ public final class ExampleProto {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse prototype) {
+    public static Builder newBuilder(GetResponse prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
 
-    @java.lang.Override
+    @Override
     protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        BuilderParent parent) {
       Builder builder = new Builder(parent);
       return builder;
     }
@@ -1773,17 +1929,17 @@ public final class ExampleProto {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponseOrBuilder {
+       implements GetResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetResponse_descriptor;
+        return ExampleProto.internal_static_service_GetResponse_descriptor;
       }
 
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      protected FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetResponse_fieldAccessorTable
+        return ExampleProto.internal_static_service_GetResponse_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse.class, com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse.Builder.class);
+                GetResponse.class, Builder.class);
       }
 
       // Construct using com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse.newBuilder()
@@ -1792,7 +1948,7 @@ public final class ExampleProto {
       }
 
       private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+          BuilderParent parent) {
         super(parent);
         maybeForceBuilderInitialization();
       }
@@ -1817,23 +1973,23 @@ public final class ExampleProto {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.internal_static_service_GetResponse_descriptor;
+        return ExampleProto.internal_static_service_GetResponse_descriptor;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse getDefaultInstanceForType() {
-        return com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse.getDefaultInstance();
+      public GetResponse getDefaultInstanceForType() {
+        return GetResponse.getDefaultInstance();
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse build() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse result = buildPartial();
+      public GetResponse build() {
+        GetResponse result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse buildPartial() {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse result = new com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse(this);
+      public GetResponse buildPartial() {
+        GetResponse result = new GetResponse(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1846,16 +2002,16 @@ public final class ExampleProto {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse) {
-          return mergeFrom((com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse)other);
+        if (other instanceof GetResponse) {
+          return mergeFrom((GetResponse)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse other) {
-        if (other == com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse.getDefaultInstance()) return this;
+      public Builder mergeFrom(GetResponse other) {
+        if (other == GetResponse.getDefaultInstance()) return this;
         if (other.hasValue()) {
           bitField0_ |= 0x00000001;
           value_ = other.value_;
@@ -1873,11 +2029,11 @@ public final class ExampleProto {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse parsedMessage = null;
+        GetResponse parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.github.wenweihu86.raft.example.server.service.ExampleProto.GetResponse) e.getUnfinishedMessage();
+          parsedMessage = (GetResponse) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -1889,7 +2045,7 @@ public final class ExampleProto {
       private int bitField0_;
 
       // optional string value = 1;
-      private java.lang.Object value_ = "";
+      private Object value_ = "";
       /**
        * <code>optional string value = 1;</code>
        */
@@ -1899,15 +2055,15 @@ public final class ExampleProto {
       /**
        * <code>optional string value = 1;</code>
        */
-      public java.lang.String getValue() {
-        java.lang.Object ref = value_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+      public String getValue() {
+        Object ref = value_;
+        if (!(ref instanceof String)) {
+          String s = ((com.google.protobuf.ByteString) ref)
               .toStringUtf8();
           value_ = s;
           return s;
         } else {
-          return (java.lang.String) ref;
+          return (String) ref;
         }
       }
       /**
@@ -1915,11 +2071,11 @@ public final class ExampleProto {
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
-        java.lang.Object ref = value_;
+        Object ref = value_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
+                  (String) ref);
           value_ = b;
           return b;
         } else {
@@ -1930,7 +2086,7 @@ public final class ExampleProto {
        * <code>optional string value = 1;</code>
        */
       public Builder setValue(
-          java.lang.String value) {
+          String value) {
         if (value == null) {
     throw new NullPointerException();
   }
@@ -2001,13 +2157,13 @@ public final class ExampleProto {
   private static com.google.protobuf.Descriptors.FileDescriptor
       descriptor;
   static {
-    java.lang.String[] descriptorData = {
-      "\n\rexample.proto\022\007service\"(\n\nSetRequest\022\013" +
-      "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"\036\n\013SetRespons" +
-      "e\022\017\n\007success\030\001 \001(\010\"\031\n\nGetRequest\022\013\n\003key\030" +
-      "\001 \001(\t\"\034\n\013GetResponse\022\r\n\005value\030\001 \001(\tBA\n1c" +
-      "om.github.wenweihu86.raft.example.server" +
-      ".serviceB\014ExampleProto"
+    String[] descriptorData = {
+      "\n\rexample.proto\022\007service\"6\n\nSetRequest\022\013" +
+      "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\022\014\n\004type\030\003 \001(\t" +
+      "\"\036\n\013SetResponse\022\017\n\007success\030\001 \001(\010\"\031\n\nGetR" +
+      "equest\022\013\n\003key\030\001 \001(\t\"\034\n\013GetResponse\022\r\n\005va" +
+      "lue\030\001 \001(\tBA\n1com.github.wenweihu86.raft." +
+      "example.server.serviceB\014ExampleProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2019,25 +2175,25 @@ public final class ExampleProto {
           internal_static_service_SetRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_service_SetRequest_descriptor,
-              new java.lang.String[] { "Key", "Value", });
+              new String[] { "Key", "Value", "Type", });
           internal_static_service_SetResponse_descriptor =
             getDescriptor().getMessageTypes().get(1);
           internal_static_service_SetResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_service_SetResponse_descriptor,
-              new java.lang.String[] { "Success", });
+              new String[] { "Success", });
           internal_static_service_GetRequest_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_service_GetRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_service_GetRequest_descriptor,
-              new java.lang.String[] { "Key", });
+              new String[] { "Key", });
           internal_static_service_GetResponse_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_service_GetResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_service_GetResponse_descriptor,
-              new java.lang.String[] { "Value", });
+              new String[] { "Value", });
           return null;
         }
       };
