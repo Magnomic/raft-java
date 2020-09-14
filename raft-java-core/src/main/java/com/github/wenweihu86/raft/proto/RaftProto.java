@@ -116,6 +116,10 @@ public final class RaftProto {
      * <code>ENTRY_TYPE_FUTURE_DATA = 2;</code>
      */
     ENTRY_TYPE_FUTURE_DATA(2, 2),
+    /**
+     * <code>ENTRY_TYPE_SIGNAL_DATA = 3;</code>
+     */
+    ENTRY_TYPE_SIGNAL_DATA(3, 3),
     ;
 
     /**
@@ -130,6 +134,10 @@ public final class RaftProto {
      * <code>ENTRY_TYPE_FUTURE_DATA = 2;</code>
      */
     public static final int ENTRY_TYPE_FUTURE_DATA_VALUE = 2;
+    /**
+     * <code>ENTRY_TYPE_SIGNAL_DATA = 3;</code>
+     */
+    public static final int ENTRY_TYPE_SIGNAL_DATA_VALUE = 3;
 
 
     public final int getNumber() { return value; }
@@ -139,6 +147,7 @@ public final class RaftProto {
         case 0: return ENTRY_TYPE_DATA;
         case 1: return ENTRY_TYPE_CONFIGURATION;
         case 2: return ENTRY_TYPE_FUTURE_DATA;
+        case 3: return ENTRY_TYPE_SIGNAL_DATA;
         default: return null;
       }
     }
@@ -14478,10 +14487,11 @@ public final class RaftProto {
       "raft.Server\022\035\n\007servers\030\004 \003(\0132\014.raft.Serv" +
       "er*K\n\007ResCode\022\024\n\020RES_CODE_SUCCESS\020\000\022\021\n\rR" +
       "ES_CODE_FAIL\020\001\022\027\n\023RES_CODE_NOT_LEADER\020\002*" +
-      "Z\n\tEntryType\022\023\n\017ENTRY_TYPE_DATA\020\000\022\034\n\030ENT" +
+      "v\n\tEntryType\022\023\n\017ENTRY_TYPE_DATA\020\000\022\034\n\030ENT" +
       "RY_TYPE_CONFIGURATION\020\001\022\032\n\026ENTRY_TYPE_FU" +
-      "TURE_DATA\020\002B-\n com.github.wenweihu86.raf" +
-      "t.protoB\tRaftProto"
+      "TURE_DATA\020\002\022\032\n\026ENTRY_TYPE_SIGNAL_DATA\020\003B" +
+      "-\n com.github.wenweihu86.raft.protoB\tRaf" +
+      "tProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

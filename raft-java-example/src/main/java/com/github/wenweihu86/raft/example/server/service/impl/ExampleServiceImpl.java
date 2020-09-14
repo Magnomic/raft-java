@@ -49,6 +49,7 @@ public class ExampleServiceImpl implements ExampleService {
                 leaderId = -1;
             }
             leaderId = raftNode.getLeaderId();
+            LOG.info("My leader is {}", leaderId);
             Peer peer = raftNode.getPeerMap().get(leaderId);
             Endpoint endpoint = new Endpoint(peer.getServer().getEndpoint().getHost(),
                     peer.getServer().getEndpoint().getPort());

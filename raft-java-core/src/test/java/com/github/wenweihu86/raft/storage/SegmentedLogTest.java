@@ -32,7 +32,7 @@ public class SegmentedLogTest {
                     .build();
             entries.add(entry);
         }
-        long lastLogIndex = segmentedLog.append(entries);
+        long lastLogIndex = segmentedLog.append(entries, null);
         Assert.assertTrue(lastLogIndex == 9);
 
         segmentedLog.truncatePrefix(5);

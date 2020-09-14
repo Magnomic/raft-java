@@ -14,6 +14,7 @@ enum EntryType {
     ENTRY_TYPE_DATA = 0;
     ENTRY_TYPE_CONFIGURATION= 1;
     ENTRY_TYPE_FUTURE_DATA=2;
+    ENTRY_TYPE_SIGNAL_DATA=3;
 };
 
 message Endpoint {

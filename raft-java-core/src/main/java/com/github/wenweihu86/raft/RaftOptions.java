@@ -5,6 +5,7 @@ import lombok.Setter;
 
 /**
  * raft配置选项
+ * raft配置选项
  * Created by wenweihu86 on 2017/5/2.
  */
 @Setter
@@ -33,7 +34,7 @@ public class RaftOptions {
     private long catchupMargin = 500;
 
     // replicate最大等待超时时间，单位ms
-    private long maxAwaitTimeout = 1000;
+    private long maxAwaitTimeout = 10000;
 
     // 与其他节点进行同步、选主等操作的线程池大小
     private int raftConsensusThreadNum = 20;

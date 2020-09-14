@@ -2,6 +2,7 @@ package com.github.wenweihu86.raft;
 
 import com.baidu.brpc.client.RpcCallback;
 import com.github.wenweihu86.raft.proto.RaftProto;
+import com.github.wenweihu86.raft.storage.Segment;
 import com.github.wenweihu86.raft.storage.SegmentedLog;
 import com.github.wenweihu86.raft.util.ConfigurationUtils;
 import com.google.protobuf.ByteString;
@@ -58,6 +59,9 @@ public class RaftNode {
     private long commitIndex;
     // 最后被应用到状态机的日志条目索引值（初始化为 0，持续递增）
     private volatile long lastAppliedIndex;
+
+    private static RaftProto.LogEntry endFlag = RaftProto.LogEntry.newBuilder()
+            .setType(RaftProto.EntryType.ENTRY_TYPE_SIGNAL_DATA).build();
 
     private Lock lock = new ReentrantLock();
     private Condition commitIndexCondition = lock.newCondition();
@@ -162,10 +166,10 @@ public class RaftNode {
             entries.add(logEntry);
             // Leader写入entries
             if (!entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
-                newLastLogIndex = raftLog.append(entries);
+                newLastLogIndex = raftLog.append(entries, raftFutureLog);
             } else {
                 // 得到未来预分配的log index
-                newLastLogIndex = raftFutureLog.appendFuture(peerMap.size()+1, localServer.getServerId(), entries);
+                newLastLogIndex = raftFutureLog.appendFuture(peerMap.size()+1, localServer.getServerId(), getRaftLog().getLastLogIndex(), entries);
                 LOG.info("get new log index {}", newLastLogIndex);
             }
 //            raftLog.updateMetaData(currentTerm, null, raftLog.getFirstLogIndex());
@@ -194,7 +198,7 @@ public class RaftNode {
                 }
             }
 
-            if (raftOptions.isAsyncWrite()) {
+            if (raftOptions.isAsyncWrite() || entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
                 // 主节点写成功后，就返回。
                 return true;
             }
@@ -212,6 +216,8 @@ public class RaftNode {
         } finally {
             lock.unlock();
         }
+
+
         LOG.info("{}:\t lastAppliedIndex={} newLastLogIndex={}", entryType, lastAppliedIndex, newLastLogIndex);
         if (lastAppliedIndex < newLastLogIndex) {
             return false;
@@ -261,13 +267,22 @@ public class RaftNode {
         lock.lock();
         try {
             // 最低窗口位
-            long firstLogIndex = raftFutureLog.getFirstLogIndex();
-
-            LOG.info("My firstLogIndex is {}, peer {}'s next index is {}", firstLogIndex, peer.getServer().getServerId(), peer.getNextIndex());
-            // 如果需要发给节点的下一个index在上个窗口，就不要再给这个节点发了，因为Leader会发给他这个entry，没有必要再让此节点发送了
-            if (peer.getNextIndex() >= firstLogIndex){
-                return;
+            long firstLogIndex = raftFutureLog.getCurrentFutureWindow();
+            if (peer.getNextFutureIndex() == 0){
+                // 此节点不知道对方的下一个index，找到自己的最低窗口的最低值，当作日志起始发送位置
+                // 这里应该不会为NULL，因为这个方法永远是在执行过segmentedLog之后执行的
+                prevLogIndex = getRaftFutureLog().getStartFutureLogIndexSegmentMap().lastEntry().getValue().getStartIndex();
+                LOG.info("getNextFutureIndex() == 0, prevLogIndex: {}", prevLogIndex);
+            } else {
+                // 否则找到上一次发送的index
+                prevLogIndex = peer.getNextFutureIndex();
+                LOG.info("getNextFutureIndex() != 0, prevLogIndex: {}", prevLogIndex);
             }
+//            LOG.info("My firstLogIndex is {}, peer {}'s next index is {}", firstLogIndex, peer.getServer().getServerId(), peer.getNextIndex());
+            // 如果需要发给节点的下一个index在上个窗口，就不要再给这个节点发了，因为Leader会发给他这个entry，没有必要再让此节点发送了
+//            if (peer.getNextIndex() >= firstLogIndex){
+//                return;
+//            }
             // TODO: 检查是否不需要Term问题，不管哪个Term，只要自己不是Leader，就可以广播Future Entries
 //            Validate.isTrue(peer.getNextIndex() >= firstLogIndex);
 //            // peer 上一个写入Log的index
@@ -293,15 +308,13 @@ public class RaftNode {
             // 打包entries，得到request中的Entry数量
             // TODO: 检查Future Entries，如果是未发布过的Future Index，则发布到各端
             // 这里保证了一次发送的所有请求都是同一个窗口内的，如果其他节点发现不在他的窗口中，则说明整个请求都是无效的
-            LOG.info("Peer {}'s next future index is {}",peer.getServer().getServerId(),peer.getNextFutureIndex());
-            numEntries = packFutureEntries(Math.max(peer.getNextFutureIndex(), firstLogIndex), requestBuilder);
+//            LOG.info("Peer {}'s next future index is {}", peer.getServer().getServerId(), prevLogIndex);
+            numEntries = packFutureEntries(Math.max(prevLogIndex, firstLogIndex), requestBuilder);
 
-            requestBuilder.setPrevLogIndex(Math.max(peer.getNextFutureIndex(), firstLogIndex));
+//            requestBuilder.setPrevLogIndex(prevLogIndex);
             // Commit的index，不能超过Leader已经commit的index，也不能超过Leader给Follower的index
             // 即，将Leader commit的entries commit，但也不能commit Leader没有commit的entries
 //            requestBuilder.setCommitIndex(Math.min(commitIndex, prevLogIndex + numEntries));
-        } catch (Exception e){
-            e.printStackTrace();
         } finally {
             lock.unlock();
         }
@@ -333,7 +346,9 @@ public class RaftNode {
             if (response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {
 //                    peer.setMatchIndex(prevLogIndex + numEntries);
                 // 下一次的日志条目
-                peer.setNextFutureIndex(peer.getNextFutureIndex() + numEntries * configuration.getServersCount());
+                peer.setNextFutureIndex(request.getPrevLogIndex() + numEntries + 1);
+                LOG.info("received SUCCESS info from {}, its previous index is {}, numEntries is {}", peer.getServer().getServerId(),
+                        request.getPrevLogIndex(), numEntries);
                 // 不要 commit
                 if (ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
                     advanceCommitFutureIndex(request);
@@ -414,15 +429,20 @@ public class RaftNode {
             // peer 的前一条日志的index
             requestBuilder.setPrevLogIndex(prevLogIndex);
             // 打包entries，得到request中的Entry数量
-            // TODO: 检查Future Entries，如果是未发布过的Future Index，则也顺便一起发布到各端
+            // TODO: 检查Future Entries，如果是未发布过的Future Index，则也顺便一起发布到各端、
             numEntries = packEntries(peer.getNextIndex(), requestBuilder);
+//            LOG.info("The entries are {}", requestBuilder.getEntriesList());
             // Commit的index，不能超过Leader已经commit的index，也不能超过Leader给Follower的index
             // 即，将Leader commit的entries commit，但也不能commit Leader没有commit的entries
             requestBuilder.setCommitIndex(Math.min(commitIndex, prevLogIndex + numEntries));
+        } catch (Exception e){
+            e.printStackTrace();
+            return;
         } finally {
             lock.unlock();
         }
 
+        LOG.info("request info : {} - {}", requestBuilder.getPrevLogIndex(), numEntries);
         RaftProto.AppendEntriesRequest request = requestBuilder.build();
         RaftProto.AppendEntriesResponse response = peer.getRaftConsensusServiceAsync().appendEntries(request);
 
@@ -447,7 +467,9 @@ public class RaftNode {
                 stepDown(response.getTerm());
             } else {
                 if (response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {
-                    peer.setMatchIndex(prevLogIndex + numEntries);
+//                    peer.setMatchIndex(prevLogIndex + numEntries);
+//                    peer.setNextIndex(peer.getMatchIndex() + 1);
+                    peer.setMatchIndex(response.getLastLogIndex());
                     peer.setNextIndex(peer.getMatchIndex() + 1);
                     if (ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
                         advanceCommitIndex();
@@ -916,7 +938,8 @@ public class RaftNode {
         long newCommitIndex = Math.max(getRaftFutureLog().getFutureLogData().lastKey(),
                 request.getPrevLogIndex()+ request.getEntriesCount());
 //        raftNode.setCommitIndex(newCommitIndex);
-        getRaftFutureLog().updateMetaData(null,null, getRaftFutureLog().getFutureLogData().lastKey(), newCommitIndex);
+        getRaftFutureLog().updateMetaData(null,null,
+                getRaftFutureLog().getFirstLogIndex(), newCommitIndex);
 //        if (raftNode.getLastAppliedIndex() < raftNode.getCommitIndex()) {
 //            // apply state machine
 //            for (long index = raftNode.getLastAppliedIndex() + 1;
@@ -979,32 +1002,62 @@ public class RaftNode {
     // in lock
     private long packFutureEntries(long nextIndex, RaftProto.AppendEntriesRequest.Builder requestBuilder) {
         // 最大日志条目不超过窗口大小
-        long firstIndex = -1;
+        long firstIndex = Long.MAX_VALUE;
         long lastIndex = raftFutureLog.getLastFutureLogIndex();
-        LOG.info("I am going to package future entries, next index = {}, last index = {}, ", nextIndex, lastIndex);
-        LOG.info("I am going to package future entries, ServersCount = {}, ServerId = {}, ", configuration.getServersCount(), localServer.getServerId());
+        long finalIndex = Long.MIN_VALUE;
+//        LOG.info("I am going to package future entries, next index = {}, last index = {}, ", nextIndex, lastIndex);
+//        LOG.info("I am going to package future entries, ServersCount = {}, ServerId = {}, ", configuration.getServersCount(), localServer.getServerId());
         for (long index = nextIndex; index <= lastIndex; index++) {
-            LOG.info("index {} % configuration.getServersCount() == localServer.getServerId()", index);
+//            LOG.info("index {} % configuration.getServersCount() == localServer.getServerId()", index);
             if (index % configuration.getServersCount() == localServer.getServerId() % configuration.getServersCount() && raftFutureLog.getFutureEntry(index) != null) {
                 RaftProto.LogEntry entry = raftFutureLog.getFutureEntry(index);
                 requestBuilder.addFutureEntries(entry);
                 firstIndex = Math.min(index, firstIndex);
-                LOG.info("future entries packaged, next index = {}, last index = {}, ", index, entry);
+                finalIndex = Math.max(index, finalIndex);
+                LOG.info("future entries packaged, firstIndex index = {}, last index = {}, ", firstIndex, finalIndex);
             }
         }
-        return firstIndex;
+//        LOG.info("future entries packaged finished! {}", requestBuilder.getEntriesList());
+        requestBuilder.setPrevLogIndex(firstIndex);
+        return finalIndex - firstIndex;
     }
 
     // in lock
     private long packEntries(long nextIndex, RaftProto.AppendEntriesRequest.Builder requestBuilder) {
         // 保证不超出每个Request中Entry的最大数量限制
+        boolean enterFutureArea = false;
+        long extra = 0;
         long lastIndex = Math.min(raftLog.getLastLogIndex(),
                 nextIndex + raftOptions.getMaxLogEntriesPerRequest() - 1);
+        if (raftLog.getEntry(nextIndex) != null &&
+                raftLog.getEntry(nextIndex).getType().equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)){
+            // 如果第一个就是Future Entry，说明这个Future的发布失败了，把这个Entry直接发给Peer
+//            LOG.info("package future entry {} to peers", raftLog.getEntry(nextIndex));
+            requestBuilder.addEntries(raftLog.getEntry(nextIndex));
+            nextIndex ++;
+            extra = 1;
+        }
         for (long index = nextIndex; index <= lastIndex; index++) {
             RaftProto.LogEntry entry = raftLog.getEntry(index);
+            // raftLog中没有这个entry，说明这个entry为future entry
+            if (entry.getType().equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)){
+                LOG.info("meets future entries!!!! index is {}", index);
+                requestBuilder.addEntries(
+                        RaftProto.LogEntry.newBuilder()
+                                .setType(RaftProto.EntryType.ENTRY_TYPE_SIGNAL_DATA)
+                                .setTerm(entry.getTerm())
+                                .build());
+                // 标记已经进入了Future Entry区域，如果再一次遇到Normal区域，则中断发送过程
+                enterFutureArea = true;
+                continue;
+//            } else if (enterFutureArea){
+//                // 重新进入Normal Entry区域，那么当前这个是不能算的哦，所以要-1
+//                actualEndIndex = index - 1;
+//                break;
+            }
             requestBuilder.addEntries(entry);
         }
-        return lastIndex - nextIndex + 1;
+        return lastIndex - nextIndex + 1 + extra;
     }
 
     private boolean installSnapshot(Peer peer) {

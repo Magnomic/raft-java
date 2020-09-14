@@ -101,7 +101,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
     @Override
     public RaftProto.AppendEntriesResponse appendEntries(RaftProto.AppendEntriesRequest request) {
         if (request.getFutureEntriesCount() != 0){
-            LOG.info("Append Future entries request received! {}", request.getFutureEntriesList());
+//            LOG.info("Append Future entries request received! {}. ", request.getFutureEntriesList());
             raftNode.getLock().lock();
             try{
                 RaftProto.AppendEntriesResponse.Builder responseBuilder
@@ -112,10 +112,12 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                 responseBuilder.setLastLogIndex(raftNode.getRaftFutureLog().getLastFutureLogIndex());
                 // Term 不对的话，还是要返回的，不能接受
                 if (request.getTerm() < raftNode.getCurrentTerm()) {
+                    LOG.info("Term is wrong, remote term is {}, my term is {}",request.getTerm() ,raftNode.getCurrentTerm());
                     return responseBuilder.build();
                 }
                 // 判断当前的请求是否在当前窗口内
-                if (request.getPrevLogIndex() < raftNode.getRaftFutureLog().getFirstLogIndex()){
+                if (request.getPrevLogIndex() < raftNode.getRaftFutureLog().getCurrentFutureWindow()){
+                    LOG.info("Index is wrong, remote index is {}, my index is {}",request.getPrevLogIndex() ,raftNode.getRaftFutureLog().getFirstLogIndex());
                     return responseBuilder.build();
                 }
 
@@ -131,7 +133,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
 //                        continue;
 //                    }
                     index = entry.getIndex();
-                    LOG.info("received index {} !", index);
+//                    LOG.info("received index {} !", index);
                     // 如果这个Entry 已经添加过了就 pass掉
                     if (raftNode.getRaftFutureLog().getFutureLogData().containsKey(index)){
                         continue;
@@ -150,7 +152,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
 //                    index += raftNode.getConfiguration().getServersCount();
                 }
                 raftNode.getRaftFutureLog().appendFuture(raftNode.getConfiguration().getServersCount(),
-                        raftNode.getLocalServer().getServerId(), entries);
+                        raftNode.getLocalServer().getServerId(), raftNode.getRaftLog().getLastLogIndex(), entries);
 //            raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(),
 //                    null, raftNode.getRaftLog().getFirstLogIndex());
                 responseBuilder.setLastLogIndex(index);
@@ -251,9 +253,18 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                     long lastIndexKept = index - 1;
                     raftNode.getRaftLog().truncateSuffix(lastIndexKept);
                 }
+                if (entry.getType().equals(RaftProto.EntryType.ENTRY_TYPE_SIGNAL_DATA)){
+                    LOG.info("Signal index is {}", index);
+                    // 如果以SIGNAL为结尾，说明当前index是一个future entry
+                    entry = raftNode.getRaftFutureLog().getFutureEntry(index);
+                    if (entry == null){
+                        LOG.info("I got SIGNAL DATA of {}, but I can not get its entry !!!", index);
+                        break;
+                    }
+                }
                 entries.add(entry);
             }
-            raftNode.getRaftLog().append(entries);
+            raftNode.getRaftLog().append(entries, raftNode.getRaftFutureLog());
 //            raftNode.getRaftLog().updateMetaData(raftNode.getCurrentTerm(),
 //                    null, raftNode.getRaftLog().getFirstLogIndex());
             responseBuilder.setLastLogIndex(raftNode.getRaftLog().getLastLogIndex());
@@ -264,9 +275,12 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                     request.getServerId(), request.getTerm(), raftNode.getCurrentTerm(),
                     request.getEntriesCount(), responseBuilder.getResCode());
             return responseBuilder.build();
+        } catch (Exception e){
+            e.printStackTrace();
         } finally {
             raftNode.getLock().unlock();
         }
+        return null;
     }
 
     @Override

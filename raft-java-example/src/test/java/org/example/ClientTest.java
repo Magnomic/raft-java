@@ -5,9 +5,7 @@ import com.github.wenweihu86.raft.example.client.ConcurrentClientMain;
 import com.github.wenweihu86.raft.storage.Segment;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ClientTest {
     private TreeMap<Long, Record> startFutureLogIndexSegmentMap = new TreeMap<>();
@@ -26,6 +24,11 @@ public class ClientTest {
     public void testClient() throws InterruptedException {
         String[] args = {"list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053"};
         ConcurrentClientMain.main(args);
+//        long newLastLogIndex = 101;
+//        int size = 3;
+//        int serverId = 2;
+//        newLastLogIndex = newLastLogIndex - size - (newLastLogIndex % size) + serverId;
+//        System.out.println(newLastLogIndex);
 //        Record record = new Record();
 //        record.setId("123");
 //        record.futureEntries.put(123L ,123);
