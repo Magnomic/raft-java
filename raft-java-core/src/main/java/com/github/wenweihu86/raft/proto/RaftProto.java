@@ -7156,6 +7156,51 @@ public final class RaftProto {
      * <code>optional uint64 last_log_index = 3;</code>
      */
     long getLastLogIndex();
+
+    // repeated .raft.LogEntry futureEntries = 4;
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    java.util.List<LogEntry>
+        getFutureEntriesList();
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    LogEntry getFutureEntries(int index);
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    int getFutureEntriesCount();
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    java.util.List<? extends LogEntryOrBuilder>
+        getFutureEntriesOrBuilderList();
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    LogEntryOrBuilder getFutureEntriesOrBuilder(
+        int index);
   }
   /**
    * Protobuf type {@code raft.AppendEntriesResponse}
@@ -7229,6 +7274,14 @@ public final class RaftProto {
               lastLogIndex_ = input.readUInt64();
               break;
             }
+            case 34: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                futureEntries_ = new java.util.ArrayList<LogEntry>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              futureEntries_.add(input.readMessage(LogEntry.PARSER, extensionRegistry));
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -7237,6 +7290,9 @@ public final class RaftProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          futureEntries_ = java.util.Collections.unmodifiableList(futureEntries_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -7333,10 +7389,67 @@ public final class RaftProto {
       return lastLogIndex_;
     }
 
+    // repeated .raft.LogEntry futureEntries = 4;
+    public static final int FUTUREENTRIES_FIELD_NUMBER = 4;
+    private java.util.List<LogEntry> futureEntries_;
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    public java.util.List<LogEntry> getFutureEntriesList() {
+      return futureEntries_;
+    }
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    public java.util.List<? extends LogEntryOrBuilder>
+        getFutureEntriesOrBuilderList() {
+      return futureEntries_;
+    }
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    public int getFutureEntriesCount() {
+      return futureEntries_.size();
+    }
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    public LogEntry getFutureEntries(int index) {
+      return futureEntries_.get(index);
+    }
+    /**
+     * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+     *
+     * <pre>
+     * 准备存储的Future entries条目（没有Future index的时候为空）
+     * </pre>
+     */
+    public LogEntryOrBuilder getFutureEntriesOrBuilder(
+        int index) {
+      return futureEntries_.get(index);
+    }
+
     private void initFields() {
       resCode_ = ResCode.RES_CODE_SUCCESS;
       term_ = 0L;
       lastLogIndex_ = 0L;
+      futureEntries_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -7359,6 +7472,9 @@ public final class RaftProto {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeUInt64(3, lastLogIndex_);
       }
+      for (int i = 0; i < futureEntries_.size(); i++) {
+        output.writeMessage(4, futureEntries_.get(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -7379,6 +7495,10 @@ public final class RaftProto {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(3, lastLogIndex_);
+      }
+      for (int i = 0; i < futureEntries_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, futureEntries_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -7488,6 +7608,7 @@ public final class RaftProto {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getFutureEntriesFieldBuilder();
         }
       }
       private static Builder create() {
@@ -7502,6 +7623,12 @@ public final class RaftProto {
         bitField0_ = (bitField0_ & ~0x00000002);
         lastLogIndex_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
+        if (futureEntriesBuilder_ == null) {
+          futureEntries_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        } else {
+          futureEntriesBuilder_.clear();
+        }
         return this;
       }
 
@@ -7542,6 +7669,15 @@ public final class RaftProto {
           to_bitField0_ |= 0x00000004;
         }
         result.lastLogIndex_ = lastLogIndex_;
+        if (futureEntriesBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+            futureEntries_ = java.util.Collections.unmodifiableList(futureEntries_);
+            bitField0_ = (bitField0_ & ~0x00000008);
+          }
+          result.futureEntries_ = futureEntries_;
+        } else {
+          result.futureEntries_ = futureEntriesBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -7566,6 +7702,32 @@ public final class RaftProto {
         }
         if (other.hasLastLogIndex()) {
           setLastLogIndex(other.getLastLogIndex());
+        }
+        if (futureEntriesBuilder_ == null) {
+          if (!other.futureEntries_.isEmpty()) {
+            if (futureEntries_.isEmpty()) {
+              futureEntries_ = other.futureEntries_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+            } else {
+              ensureFutureEntriesIsMutable();
+              futureEntries_.addAll(other.futureEntries_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.futureEntries_.isEmpty()) {
+            if (futureEntriesBuilder_.isEmpty()) {
+              futureEntriesBuilder_.dispose();
+              futureEntriesBuilder_ = null;
+              futureEntries_ = other.futureEntries_;
+              bitField0_ = (bitField0_ & ~0x00000008);
+              futureEntriesBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getFutureEntriesFieldBuilder() : null;
+            } else {
+              futureEntriesBuilder_.addAllMessages(other.futureEntries_);
+            }
+          }
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -7726,6 +7888,318 @@ public final class RaftProto {
         lastLogIndex_ = 0L;
         onChanged();
         return this;
+      }
+
+      // repeated .raft.LogEntry futureEntries = 4;
+      private java.util.List<LogEntry> futureEntries_ =
+        java.util.Collections.emptyList();
+      private void ensureFutureEntriesIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          futureEntries_ = new java.util.ArrayList<LogEntry>(futureEntries_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          LogEntry, LogEntry.Builder, LogEntryOrBuilder> futureEntriesBuilder_;
+
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public java.util.List<LogEntry> getFutureEntriesList() {
+        if (futureEntriesBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(futureEntries_);
+        } else {
+          return futureEntriesBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public int getFutureEntriesCount() {
+        if (futureEntriesBuilder_ == null) {
+          return futureEntries_.size();
+        } else {
+          return futureEntriesBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public LogEntry getFutureEntries(int index) {
+        if (futureEntriesBuilder_ == null) {
+          return futureEntries_.get(index);
+        } else {
+          return futureEntriesBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder setFutureEntries(
+          int index, LogEntry value) {
+        if (futureEntriesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFutureEntriesIsMutable();
+          futureEntries_.set(index, value);
+          onChanged();
+        } else {
+          futureEntriesBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder setFutureEntries(
+          int index, LogEntry.Builder builderForValue) {
+        if (futureEntriesBuilder_ == null) {
+          ensureFutureEntriesIsMutable();
+          futureEntries_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          futureEntriesBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder addFutureEntries(LogEntry value) {
+        if (futureEntriesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFutureEntriesIsMutable();
+          futureEntries_.add(value);
+          onChanged();
+        } else {
+          futureEntriesBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder addFutureEntries(
+          int index, LogEntry value) {
+        if (futureEntriesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureFutureEntriesIsMutable();
+          futureEntries_.add(index, value);
+          onChanged();
+        } else {
+          futureEntriesBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder addFutureEntries(
+          LogEntry.Builder builderForValue) {
+        if (futureEntriesBuilder_ == null) {
+          ensureFutureEntriesIsMutable();
+          futureEntries_.add(builderForValue.build());
+          onChanged();
+        } else {
+          futureEntriesBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder addFutureEntries(
+          int index, LogEntry.Builder builderForValue) {
+        if (futureEntriesBuilder_ == null) {
+          ensureFutureEntriesIsMutable();
+          futureEntries_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          futureEntriesBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder addAllFutureEntries(
+          Iterable<? extends LogEntry> values) {
+        if (futureEntriesBuilder_ == null) {
+          ensureFutureEntriesIsMutable();
+          super.addAll(values, futureEntries_);
+          onChanged();
+        } else {
+          futureEntriesBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder clearFutureEntries() {
+        if (futureEntriesBuilder_ == null) {
+          futureEntries_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000008);
+          onChanged();
+        } else {
+          futureEntriesBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public Builder removeFutureEntries(int index) {
+        if (futureEntriesBuilder_ == null) {
+          ensureFutureEntriesIsMutable();
+          futureEntries_.remove(index);
+          onChanged();
+        } else {
+          futureEntriesBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public LogEntry.Builder getFutureEntriesBuilder(
+          int index) {
+        return getFutureEntriesFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public LogEntryOrBuilder getFutureEntriesOrBuilder(
+          int index) {
+        if (futureEntriesBuilder_ == null) {
+          return futureEntries_.get(index);  } else {
+          return futureEntriesBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public java.util.List<? extends LogEntryOrBuilder>
+           getFutureEntriesOrBuilderList() {
+        if (futureEntriesBuilder_ != null) {
+          return futureEntriesBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(futureEntries_);
+        }
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public LogEntry.Builder addFutureEntriesBuilder() {
+        return getFutureEntriesFieldBuilder().addBuilder(
+            LogEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public LogEntry.Builder addFutureEntriesBuilder(
+          int index) {
+        return getFutureEntriesFieldBuilder().addBuilder(
+            index, LogEntry.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .raft.LogEntry futureEntries = 4;</code>
+       *
+       * <pre>
+       * 准备存储的Future entries条目（没有Future index的时候为空）
+       * </pre>
+       */
+      public java.util.List<LogEntry.Builder>
+           getFutureEntriesBuilderList() {
+        return getFutureEntriesFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          LogEntry, LogEntry.Builder, LogEntryOrBuilder>
+          getFutureEntriesFieldBuilder() {
+        if (futureEntriesBuilder_ == null) {
+          futureEntriesBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              LogEntry, LogEntry.Builder, LogEntryOrBuilder>(
+                  futureEntries_,
+                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  getParentForChildren(),
+                  isClean());
+          futureEntries_ = null;
+        }
+        return futureEntriesBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:raft.AppendEntriesResponse)
@@ -14462,16 +14936,17 @@ public final class RaftProto {
       "\026\n\016prev_log_index\030\003 \001(\004\022\025\n\rprev_log_term" +
       "\030\004 \001(\004\022\024\n\014commit_index\030\005 \001(\004\022\037\n\007entries\030" +
       "\006 \003(\0132\016.raft.LogEntry\022%\n\rfutureEntries\030\007",
-      " \003(\0132\016.raft.LogEntry\"^\n\025AppendEntriesRes" +
-      "ponse\022\037\n\010res_code\030\001 \001(\0162\r.raft.ResCode\022\014" +
-      "\n\004term\030\002 \001(\004\022\026\n\016last_log_index\030\003 \001(\004\"\301\001\n" +
+      " \003(\0132\016.raft.LogEntry\"\205\001\n\025AppendEntriesRe" +
+      "sponse\022\037\n\010res_code\030\001 \001(\0162\r.raft.ResCode\022" +
+      "\014\n\004term\030\002 \001(\004\022\026\n\016last_log_index\030\003 \001(\004\022%\n" +
+      "\rfutureEntries\030\004 \003(\0132\016.raft.LogEntry\"\301\001\n" +
       "\026InstallSnapshotRequest\022\021\n\tserver_id\030\001 \001" +
       "(\r\022\014\n\004term\030\002 \001(\004\0222\n\022snapshot_meta_data\030\003" +
       " \001(\0132\026.raft.SnapshotMetaData\022\021\n\tfile_nam" +
       "e\030\004 \001(\t\022\016\n\006offset\030\005 \001(\004\022\014\n\004data\030\006 \001(\014\022\020\n" +
       "\010is_first\030\007 \001(\010\022\017\n\007is_last\030\010 \001(\010\"H\n\027Inst" +
-      "allSnapshotResponse\022\037\n\010res_code\030\001 \001(\0162\r." +
-      "raft.ResCode\022\014\n\004term\030\002 \001(\004\"\022\n\020GetLeaderR",
+      "allSnapshotResponse\022\037\n\010res_code\030\001 \001(\0162\r.",
+      "raft.ResCode\022\014\n\004term\030\002 \001(\004\"\022\n\020GetLeaderR" +
       "equest\"e\n\021GetLeaderResponse\022\037\n\010res_code\030" +
       "\001 \001(\0162\r.raft.ResCode\022\017\n\007res_msg\030\002 \001(\t\022\036\n" +
       "\006leader\030\003 \001(\0132\016.raft.Endpoint\"0\n\017AddPeer" +
@@ -14480,8 +14955,8 @@ public final class RaftProto {
       "raft.ResCode\022\017\n\007res_msg\030\002 \001(\t\"3\n\022RemoveP" +
       "eersRequest\022\035\n\007servers\030\001 \003(\0132\014.raft.Serv" +
       "er\"G\n\023RemovePeersResponse\022\037\n\010res_code\030\001 " +
-      "\001(\0162\r.raft.ResCode\022\017\n\007res_msg\030\002 \001(\t\"\031\n\027G" +
-      "etConfigurationRequest\"\211\001\n\030GetConfigurat",
+      "\001(\0162\r.raft.ResCode\022\017\n\007res_msg\030\002 \001(\t\"\031\n\027G",
+      "etConfigurationRequest\"\211\001\n\030GetConfigurat" +
       "ionResponse\022\037\n\010res_code\030\001 \001(\0162\r.raft.Res" +
       "Code\022\017\n\007res_msg\030\002 \001(\t\022\034\n\006leader\030\003 \001(\0132\014." +
       "raft.Server\022\035\n\007servers\030\004 \003(\0132\014.raft.Serv" +
@@ -14490,7 +14965,7 @@ public final class RaftProto {
       "v\n\tEntryType\022\023\n\017ENTRY_TYPE_DATA\020\000\022\034\n\030ENT" +
       "RY_TYPE_CONFIGURATION\020\001\022\032\n\026ENTRY_TYPE_FU" +
       "TURE_DATA\020\002\022\032\n\026ENTRY_TYPE_SIGNAL_DATA\020\003B" +
-      "-\n com.github.wenweihu86.raft.protoB\tRaf" +
+      "-\n com.github.wenweihu86.raft.protoB\tRaf",
       "tProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
@@ -14557,7 +15032,7 @@ public final class RaftProto {
           internal_static_raft_AppendEntriesResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_raft_AppendEntriesResponse_descriptor,
-              new String[] { "ResCode", "Term", "LastLogIndex", });
+              new String[] { "ResCode", "Term", "LastLogIndex", "FutureEntries", });
           internal_static_raft_InstallSnapshotRequest_descriptor =
             getDescriptor().getMessageTypes().get(10);
           internal_static_raft_InstallSnapshotRequest_fieldAccessorTable = new

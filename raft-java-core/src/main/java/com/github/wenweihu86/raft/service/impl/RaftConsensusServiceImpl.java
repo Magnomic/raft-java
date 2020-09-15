@@ -1,5 +1,9 @@
 package com.github.wenweihu86.raft.service.impl;
 
+import com.baidu.brpc.client.BrpcProxy;
+import com.baidu.brpc.client.RpcClient;
+import com.baidu.brpc.client.RpcClientOptions;
+import com.baidu.brpc.client.instance.Endpoint;
 import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftConsensusService;
@@ -258,9 +262,31 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                     // 如果以SIGNAL为结尾，说明当前index是一个future entry
                     entry = raftNode.getRaftFutureLog().getFutureEntry(index);
                     if (entry == null){
+                        // 主节点有，我没有，我告诉主节点，我只Apply到当前index，主节点直接把这个Entry的完整内容重新发给我！
                         LOG.info("I got SIGNAL DATA of {}, but I can not get its entry !!!", index);
                         break;
                     }
+                } else {
+                    if (raftNode.getRaftFutureLog().getFutureEntry(index) != null &&
+                            !entry.getType().equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)){
+                        // 主节点没有这个Future Entry，但是我有
+                        if (entry.getIndex() % raftNode.getConfiguration().getServersCount()
+                                == raftNode.getLocalServer().getServerId()){
+                            // 如果是我自己产生的Future Entry，重新发布新的Future Entry
+                            // 别人的就不要管了，让他自己去生成
+                            // 写入Future Log
+                            List<RaftProto.LogEntry> toDoEntries = new ArrayList<>();
+                            // 重新分配 Future Index，然后不用管他就完了，下次发送Future Entries的时候，他就自己带着发出去了
+                            RaftProto.LogEntry toDoEntry = RaftProto.LogEntry.newBuilder(entry).setIndex(0).build();
+                            toDoEntries.add(toDoEntry);
+                            raftNode.getRaftFutureLog().appendFuture(
+                                    raftNode.getConfiguration().getServersCount(),
+                                    raftNode.getLocalServer().getServerId(),
+                                    raftNode.getRaftLog().getLastLogIndex(),
+                                    toDoEntries);
+                        }
+                    }
+                    //
                 }
                 entries.add(entry);
             }
