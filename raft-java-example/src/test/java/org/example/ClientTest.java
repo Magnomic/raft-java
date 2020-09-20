@@ -24,12 +24,14 @@ public class ClientTest {
     public void testClient() throws InterruptedException {
         String[] args = {"list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053"};
         ConcurrentClientMain.main(args);
+//        String[] args = {"list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053", "f44fb884-89e7-4f61-b4fd-a18aed95b1f6"};
+//        ClientMain.main(args);
 //        long newLastLogIndex = 101;
 //        int size = 3;
 //        int serverId = 2;
 //        newLastLogIndex = newLastLogIndex - size - (newLastLogIndex % size) + serverId;
 //        System.out.println(newLastLogIndex);
-//        Record record = new Record();
+//        Record record = new Reut.println(newLascord();
 //        record.setId("123");
 //        record.futureEntries.put(123L ,123);
 //        startFutureLogIndexSegmentMap.put(123L, record);

@@ -36,23 +36,23 @@ public class ClientMain {
         ExampleService exampleService = BrpcProxy.getProxy(rpcClient, ExampleService.class);
         final JsonFormat jsonFormat = new JsonFormat();
 
-        // set
-        if (finalValue != null) {
-            // TODO: 是否为非关键事务，增加type属性
-            ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()
-                    .setKey(key).setValue(finalValue).build();
-            ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
-            System.out.printf("set request, key=%s value=%s response=%s\n",
-                    key, finalValue, jsonFormat.printToString(setResponse));
-
-        } else {
+//        // set
+//        if (finalValue != null) {
+//            // TODO: 是否为非关键事务，增加type属性
+//            ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()
+//                    .setKey(key).setValue(finalValue).build();
+//            ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
+//            System.out.printf("set request, key=%s value=%s response=%s\n",
+//                    key, finalValue, jsonFormat.printToString(setResponse));
+//
+//        } else {
             // get
             ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()
                     .setKey(key).build();
             ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
             System.out.printf("get request, key=%s, response=%s\n",
                     key, jsonFormat.printToString(getResponse));
-        }
-        rpcClient.stop();
+//        }
+//        rpcClient.stop();
     }
 }

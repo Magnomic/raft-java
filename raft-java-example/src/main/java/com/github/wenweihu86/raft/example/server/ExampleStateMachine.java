@@ -72,6 +72,11 @@ public class ExampleStateMachine implements StateMachine {
         try {
             ExampleProto.SetRequest request = ExampleProto.SetRequest.parseFrom(dataBytes);
             db.put(request.getKey().getBytes(), request.getValue().getBytes());
+//            LOG.info("PUT {} success, key: {}, val: {}",
+//                    request.getKey(),
+//                    request.getKey(),
+//                    new String(db.get(request.getKey().getBytes()))
+//            );
         } catch (Exception ex) {
             LOG.warn("meet exception, msg={}", ex.getMessage());
         }

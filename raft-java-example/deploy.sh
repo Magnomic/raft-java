@@ -14,7 +14,7 @@ cd example1
 cp -f ../../target/$EXAMPLE_TAR .
 tar -zxvf $EXAMPLE_TAR
 chmod +x ./bin/*.sh
-nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8051:1" &
+nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8051:1" >> nohup1.out &
 cd -
 
 mkdir example2
@@ -22,7 +22,7 @@ cd example2
 cp -f ../../target/$EXAMPLE_TAR .
 tar -zxvf $EXAMPLE_TAR
 chmod +x ./bin/*.sh
-nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8052:2" &
+nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8052:2" >> nohup2.out &
 cd -
 
 mkdir example3
@@ -30,7 +30,7 @@ cd example3
 cp -f ../../target/$EXAMPLE_TAR .
 tar -zxvf $EXAMPLE_TAR
 chmod +x ./bin/*.sh
-nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8053:3" &
+nohup ./bin/run_server.sh ./data "127.0.0.1:8051:1,127.0.0.1:8052:2,127.0.0.1:8053:3" "127.0.0.1:8053:3" >> nohup3.out &
 cd -
 
 mkdir client

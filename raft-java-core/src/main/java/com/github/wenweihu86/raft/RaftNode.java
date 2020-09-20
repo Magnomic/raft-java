@@ -111,7 +111,7 @@ public class RaftNode {
         for (long index = snapshot.getMetaData().getLastIncludedIndex() + 1;
              index <= commitIndex; index++) {
             RaftProto.LogEntry entry = raftLog.getEntry(index);
-            if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {
+            if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA || entry.getType() == RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA) {
                 stateMachine.apply(entry.getData().toByteArray());
             } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
                 applyConfiguration(entry);
@@ -988,7 +988,7 @@ public class RaftNode {
         // 同步到状态机
         for (long index = oldCommitIndex + 1; index <= newCommitIndex; index++) {
             RaftProto.LogEntry entry = raftLog.getEntry(index);
-            if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA) {
+            if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA || entry.getType() == RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA) {
                 stateMachine.apply(entry.getData().toByteArray());
             } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
                 applyConfiguration(entry);

@@ -30,7 +30,7 @@ public class Segment {
         }
     }
 
-    public static long fixedWindowSize = 100;
+    public static long fixedWindowSize = 400;
     private long futureEndIndex;
     private boolean canWrite;
     private long startIndex;

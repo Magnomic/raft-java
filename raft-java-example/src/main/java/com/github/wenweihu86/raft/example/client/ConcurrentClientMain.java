@@ -5,7 +5,11 @@ import com.baidu.brpc.client.RpcClient;
 import com.github.wenweihu86.raft.example.server.service.ExampleProto;
 import com.github.wenweihu86.raft.example.server.service.ExampleService;
 import com.googlecode.protobuf.format.JsonFormat;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,8 +18,23 @@ import java.util.concurrent.Future;
 /**
  * Created by wenweihu86 on 2017/5/14.
  */
+
+@Getter
+@Setter
+class Record {
+    String key;
+    String type;
+
+    Record(String key, String type){
+        this.key = key;
+        this.type = type;
+    }
+}
+
 public class ConcurrentClientMain {
     private static JsonFormat jsonFormat = new JsonFormat();
+
+
 
     public static void main(String[] args) throws InterruptedException {
         if (args.length != 1) {
@@ -31,40 +50,72 @@ public class ConcurrentClientMain {
         ExecutorService readThreadPool = Executors.newFixedThreadPool(20);
         ExecutorService writeThreadPool = Executors.newFixedThreadPool(20);
         Future<?>[] future = new Future[15];
-        for (int i = 0; i < 15; i++) {
-            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool));
+        Integer submitSum = 1000;
+        Integer threadSum = 5;
+        List<Record> queryArr = new ArrayList<>();
+        for (int j=0;j<submitSum*threadSum;j++){
+            queryArr.add(new Record(UUID.randomUUID().toString(), j % 4 == 0? "F": "N"));
+        }
+        for (int i = 0; i < threadSum; i++) {
+            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, "F",
+                    queryArr.subList(i*submitSum, (i+1)*submitSum), submitSum));
         }
         Thread.sleep(10000L);
+
+        List<Record> queryArr2 = new ArrayList<>();
+        for (int j=0;j<submitSum*threadSum;j++){
+            queryArr2.add(new Record(UUID.randomUUID().toString(), j % 4 == 0? "F": "N"));
+        }
+        for (int i = 0; i < threadSum; i++) {
+            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, "F",
+                    queryArr2.subList(i*submitSum, (i+1)*submitSum), submitSum));
+        }
+        Thread.sleep(10000L);
+
+        for (Record key: queryArr){
+            readThreadPool.submit(new GetTask(exampleService, key.getKey(), key.getType()));
+        }
+        Thread.sleep(10000L);
+//        Thread.sleep(2000L);
+//        for (int i = 0; i < 15; i++) {
+//            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, "N"));
+//        }
     }
 
     public static class SetTask implements Runnable {
         private ExampleService exampleService;
         ExecutorService readThreadPool;
+        private String type;
+        private List<Record> queryArr;
+        Integer submitSum;
 
-        public SetTask(ExampleService exampleService, ExecutorService readThreadPool) {
+        public SetTask(ExampleService exampleService, ExecutorService readThreadPool, String type,
+                       List<Record> queryArr, Integer submitSum) {
             this.exampleService = exampleService;
             this.readThreadPool = readThreadPool;
+            this.type = type;
+            this.queryArr = queryArr;
+            this.submitSum = submitSum;
         }
 
         @Override
         public void run() {
 //            for (int i=0;i<10;i++) {
-            for (int i=0;i<20;i++) {
-                String key = UUID.randomUUID().toString();
-                String value = UUID.randomUUID().toString();
+            for (int i=0;i<submitSum;i++) {
                 ExampleProto.SetRequest setRequest = ExampleProto.SetRequest.newBuilder()
-                        .setKey(key).setValue(value).setType(i % 4 == 0? "F": "N").build();
+                        .setKey(queryArr.get(i).getKey()).setValue(queryArr.get(i).getKey())
+                        .setType(queryArr.get(i).getType()).build();
 //                        .setKey(key).setValue(value).setType(i % 100 == 0? "F": "F").build();
 
                 long startTime = System.currentTimeMillis();
                 ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
                 try {
                     if (setResponse != null) {
-                        System.out.printf("set request, key=%s, value=%s, response=%s, elapseMS=%d\n",
-                                key, value, jsonFormat.printToString(setResponse), System.currentTimeMillis() - startTime);
-                        readThreadPool.submit(new GetTask(exampleService, key, setRequest.getType()));
+                        System.out.printf("set %s request, key=%s, value=%s, response=%s, elapseMS=%d\n",
+                                setRequest.getType(), queryArr.get(i).getKey(), queryArr.get(i).getKey(), jsonFormat.printToString(setResponse), System.currentTimeMillis() - startTime);
+//                        readThreadPool.submit(new GetTask(exampleService, key, setRequest.getType()));
                     } else {
-                        System.out.printf("set request failed, key=%s value=%s\n", key, value);
+                        System.out.printf("set request failed, key=%s value=%s\n", queryArr.get(i), queryArr.get(i));
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -86,35 +137,27 @@ public class ConcurrentClientMain {
 
         @Override
         public void run() {
-            if (type.equals("F")){
-                try {
-                    Thread.sleep(5000L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+//            try {
+//                Thread.sleep(5000L);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()
                     .setKey(key).build();
-            while (true) {
-                long startTime = System.currentTimeMillis();
-                ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
-                try {
-                    if (getResponse != null) {
-                        System.out.printf("get request, key=%s, response=%s, elapseMS=%d\n",
-                                key, jsonFormat.printToString(getResponse), System.currentTimeMillis() - startTime);
-                        if (!"{}".equals(jsonFormat.printToString(getResponse))){
-                            break;
-                        }
-                    } else {
-                        System.out.printf("get request failed, key=%s\n", key);
-                    }
-                    if (type.equals("F")){
-                        break;
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+//            while (true) {
+            long startTime = System.currentTimeMillis();
+            ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
+            try {
+                if (getResponse != null) {
+                    System.out.printf("get %s request, key=%s, response=%s, elapseMS=%d\n",
+                            type, key, jsonFormat.printToString(getResponse), System.currentTimeMillis() - startTime);
+                } else {
+                    System.out.printf("get request failed, key=%s\n", key);
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
+//            }
         }
     }
 
