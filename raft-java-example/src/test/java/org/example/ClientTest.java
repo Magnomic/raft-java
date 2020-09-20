@@ -22,7 +22,7 @@ public class ClientTest {
     }
     @Test
     public void testClient() throws InterruptedException {
-        String[] args = {"list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053"};
+        String[] args = {"list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053,127.0.0.1:8054,127.0.0.1:8055"};
         ConcurrentClientMain.main(args);
 //        String[] args = {"list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053", "f44fb884-89e7-4f61-b4fd-a18aed95b1f6"};
 //        ClientMain.main(args);
