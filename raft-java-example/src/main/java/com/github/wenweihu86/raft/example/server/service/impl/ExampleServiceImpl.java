@@ -75,7 +75,7 @@ public class ExampleServiceImpl implements ExampleService {
         } else if (raftNode.getLeaderId() != raftNode.getLocalServer().getServerId()) {
             // TODO: 如果是非关键事务，则发布未来事务（是否需要增加一致性哈希）
             // 检查是否Leader已更换
-            if (request.getType().equals("N")) {
+            if (!request.getType().equals("F")) {
                 onLeaderChangeEvent();
                 if (this.exampleService == null) {
                     this.exampleService = BrpcProxy.getProxy(leaderRpcClient, ExampleService.class);
@@ -90,10 +90,17 @@ public class ExampleServiceImpl implements ExampleService {
                 responseBuilder.setSuccess(success);
             }
         } else {
-            // 如果自己是Leader，数据同步写入raft集群
-            byte[] data = request.toByteArray();
-            boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_DATA);
-            responseBuilder.setSuccess(success);
+            if (request.getType().equals("N")) {
+                // 如果自己是Leader，数据同步写入raft集群
+                byte[] data = request.toByteArray();
+                boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_DATA);
+                responseBuilder.setSuccess(success);
+            } else if (request.getType().equals("C")){
+                // 如果自己是Leader，数据同步写入raft集群
+                byte[] data = request.toByteArray();
+                boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION);
+                responseBuilder.setSuccess(success);
+            }
         }
 
         ExampleProto.SetResponse response = responseBuilder.build();

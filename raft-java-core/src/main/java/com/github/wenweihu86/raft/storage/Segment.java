@@ -3,23 +3,13 @@ package com.github.wenweihu86.raft.storage;
 import com.github.wenweihu86.raft.proto.RaftProto;
 
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by wenweihu86 on 2017/5/3.
  */
 public class Segment {
 
-    public Map<Long, Record> getFutureEntries() {
-        return futureEntries;
-    }
-
-    public void setFutureEntries(Map<Long, Record> futureEntries) {
-        this.futureEntries = futureEntries;
-    }
 
     public static class Record {
         public long offset;
@@ -28,18 +18,24 @@ public class Segment {
             this.offset = offset;
             this.entry = entry;
         }
+
+        @Override
+        public String toString() {
+            return String.format("offset : %d, entry: %s", offset, entry.toString());
+        }
     }
 
-    public static long fixedWindowSize = 400;
+    public static int fixedWindowSize = 400;
     private long futureEndIndex;
     private boolean canWrite;
     private long startIndex;
     private long endIndex;
     private long fileSize;
+    private long futureGeneration;
     private String fileName;
     private RandomAccessFile randomAccessFile;
     private List<Record> entries = new ArrayList<>();
-    private Map<Long, Record> futureEntries = new HashMap<Long, Record>((int) fixedWindowSize);
+    private List<Record> futureEntries = new ArrayList<>(Collections.nCopies(fixedWindowSize, new Record(-1, null)));
 
     public RaftProto.LogEntry getEntry(long index) {
         if (startIndex == 0 || endIndex == 0) {
@@ -53,8 +49,24 @@ public class Segment {
     }
 
     public RaftProto.LogEntry getFutureEntry(long index) {
-        if (futureEntries.get(index) == null) return null;
-        return futureEntries.get(index).entry;
+        int innerIndex = (int) (index % fixedWindowSize);
+        if (index - startIndex > fixedWindowSize) return null;
+        if (futureEntries.get(innerIndex).entry == null) return null;
+        if (futureEntries.get(innerIndex).entry.getIndex() != index) {
+            System.out.println(String.format("!!!!!!!!!!!!!!!! entry not same, %d %d",futureEntries.get(innerIndex).entry.getIndex(),index));
+            return null;
+        }
+        return futureEntries.get(innerIndex).entry;
+    }
+
+    public void putEntry(long index, Record record){
+        int innerIndex = (int) (index % fixedWindowSize);
+        futureEntries.set(innerIndex, record);
+    }
+
+    public void removeFutureEntry(long index) {
+        int innerIndex = (int) (index % fixedWindowSize);
+        futureEntries.set(innerIndex, new Record(-1, null));
     }
 
     public boolean isCanWrite() {
@@ -79,14 +91,6 @@ public class Segment {
 
     public long getFutureSegmentEndIndex(int serverId){
         return futureEndIndex;
-    }
-
-    public long getFixedWindowSize() {
-        return fixedWindowSize;
-    }
-
-    public void setFixedWindowSize(long fixedWindowSize) {
-        this.fixedWindowSize = fixedWindowSize;
     }
 
     public void setEndIndex(long endIndex) {
@@ -123,5 +127,21 @@ public class Segment {
 
     public void setEntries(List<Record> entries) {
         this.entries = entries;
+    }
+
+    public long getFutureGeneration() {
+        return futureGeneration;
+    }
+
+    public void setFutureGeneration(long futureGeneration) {
+        this.futureGeneration = futureGeneration;
+    }
+
+    public List<Record> getFutureEntries() {
+        return futureEntries;
+    }
+
+    public void setFutureEntries(List<Record> futureEntries) {
+        this.futureEntries = futureEntries;
     }
 }

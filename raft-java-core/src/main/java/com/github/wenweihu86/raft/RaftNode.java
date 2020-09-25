@@ -154,7 +154,7 @@ public class RaftNode {
         long newLastLogIndex = 0;
         try {
             // 如果自己不是Leader且是一个普通的请求
-            if (state != NodeState.STATE_LEADER && entryType.equals(RaftProto.EntryType.ENTRY_TYPE_DATA)) {
+            if (state != NodeState.STATE_LEADER && !entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
                 LOG.debug("I'm not the leader");
                 return false;
             }
@@ -352,7 +352,13 @@ public class RaftNode {
                 // 不要 commit
                 if (ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
                     advanceCommitFutureIndex(request);
-                } //else {
+                } else {
+                    if (response.getFutureTerm() > getRaftFutureLog().getLastFutureGeneration()){
+                        getRaftFutureLog().truncateFuture(response.getFutureTerm(), response.getLastLogIndex(),
+                                raftLog.getLastLogIndex(), localServer.getServerId());
+                    }
+                }
+                //else {
 //                    if (raftLog.getLastLogIndex() - peer.getMatchIndex() <= raftOptions.getCatchupMargin()) {
 //                        LOG.debug("peer catch up the leader");
 //                        peer.setCatchUp(true);
@@ -430,7 +436,8 @@ public class RaftNode {
             requestBuilder.setPrevLogIndex(prevLogIndex);
             // 打包entries，得到request中的Entry数量
             // TODO: 检查Future Entries，如果是未发布过的Future Index，则也顺便一起发布到各端、
-            numEntries = packEntries(peer.getNextIndex(), requestBuilder);
+//            LOG.info("peer id is {}, peer.getNextIndex {}, peer.getNextFutureIndex {}", peer.getServer().getServerId(), peer.getNextIndex(), peer.getNextFutureIndex());
+            numEntries = packEntries(peer.getNextIndex(), peer.getNextFutureIndex(), requestBuilder);
 //            LOG.info("The entries are {}", requestBuilder.getEntriesList());
             // Commit的index，不能超过Leader已经commit的index，也不能超过Leader给Follower的index
             // 即，将Leader commit的entries commit，但也不能commit Leader没有commit的entries
@@ -469,6 +476,7 @@ public class RaftNode {
                 if (response.getResCode() == RaftProto.ResCode.RES_CODE_SUCCESS) {
 //                    peer.setMatchIndex(prevLogIndex + numEntries);
 //                    peer.setNextIndex(peer.getMatchIndex() + 1);
+                    peer.setNextFutureIndex(response.getLastFutureLogIndex());
                     peer.setMatchIndex(response.getLastLogIndex());
                     peer.setNextIndex(peer.getMatchIndex() + 1);
                     if (ConfigurationUtils.containsServer(configuration, peer.getServer().getServerId())) {
@@ -926,6 +934,7 @@ public class RaftNode {
                 @Override
                 public void run() {
                     appendEntries(peer);
+//                    appendFutureEntries(peer);
                 }
             });
         }
@@ -935,7 +944,7 @@ public class RaftNode {
     // 事实上这里只是将收到的Future Log index 记录到 metadata中，并不是commit到state db中，
     // TODO: 先这样，用的时候再说
     private void advanceCommitFutureIndex(RaftProto.AppendEntriesRequest request) {
-        long newCommitIndex = Math.max(getRaftFutureLog().getFutureLogData().lastKey(),
+        long newCommitIndex = Math.max(getRaftFutureLog().getStartFutureLogIndexSegmentMap().lastEntry().getValue().getEndIndex(),
                 request.getPrevLogIndex()+ request.getEntriesCount());
 //        raftNode.setCommitIndex(newCommitIndex);
         getRaftFutureLog().updateMetaData(null,null,
@@ -989,6 +998,7 @@ public class RaftNode {
         for (long index = oldCommitIndex + 1; index <= newCommitIndex; index++) {
             RaftProto.LogEntry entry = raftLog.getEntry(index);
             if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA || entry.getType() == RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA) {
+                LOG.info("applying for {}", entry.getIndex());
                 stateMachine.apply(entry.getData().toByteArray());
             } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
                 applyConfiguration(entry);
@@ -1023,7 +1033,7 @@ public class RaftNode {
     }
 
     // in lock
-    private long packEntries(long nextIndex, RaftProto.AppendEntriesRequest.Builder requestBuilder) {
+    private long packEntries(long nextIndex, long nextFutureIndex, RaftProto.AppendEntriesRequest.Builder requestBuilder) {
         // 保证不超出每个Request中Entry的最大数量限制
         boolean enterFutureArea = false;
         long extra = 0;
@@ -1040,8 +1050,8 @@ public class RaftNode {
         for (long index = nextIndex; index <= lastIndex; index++) {
             RaftProto.LogEntry entry = raftLog.getEntry(index);
             // raftLog中没有这个entry，说明这个entry为future entry
-            if (entry.getType().equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)){
-                LOG.info("meets future entries!!!! index is {}", index);
+            if (entry.getType().equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA) && index < nextFutureIndex){
+//                LOG.info("meets future entries!!!! index is {}", index);
                 requestBuilder.addEntries(
                         RaftProto.LogEntry.newBuilder()
                                 .setType(RaftProto.EntryType.ENTRY_TYPE_SIGNAL_DATA)
