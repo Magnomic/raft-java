@@ -25,8 +25,8 @@ public class ClientTest {
 //        List<Record> records = new ArrayList<>(Collections.nCopies(100, new Record()));
 //        System.out.println(records.get(10));
 //        String[] args = {"list://127.0.0.1:8051,127.0.0.1:8052,127.0.0.1:8053,127.0.0.1:8054,127.0.0.1:8055"};
-        String[] args = {"list://127.0.0.1:8061,127.0.0.1:8062,127.0.0.1:8063,127.0.0.1:8064,127.0.0.1:8065"};
-//        String[] args = {"list://127.0.0.1:8061,127.0.0.1:8062,127.0.0.1:8063"};
+//        String[] args = {"list://127.0.0.1:8061,127.0.0.1:8062,127.0.0.1:8063,127.0.0.1:8064,127.0.0.1:8065"};
+        String[] args = {"list://127.0.0.1:8061,127.0.0.1:8062,127.0.0.1:8063"};
         ConcurrentClientMain.main(args);
 //        String[] args = {"list://127.0.0.1:8062,127.0.0.1:8063", "3dc140fd-24f1-42f4-8246-dfea8bd4005c"};
 //        ClientMain.main(args);

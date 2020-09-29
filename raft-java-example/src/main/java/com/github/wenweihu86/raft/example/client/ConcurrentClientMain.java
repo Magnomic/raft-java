@@ -51,9 +51,9 @@ public class ConcurrentClientMain {
         ExecutorService writeThreadPool = Executors.newFixedThreadPool(20);
         Future<?>[] future = new Future[15];
         // 每个线程提交的entry数量
-        Integer submitSum = 1000;
+        Integer submitSum = 10000;
         // 线程数
-        Integer threadSum = 5;
+        Integer threadSum = 10;
         List<Record> queryArr = new ArrayList<>();
         // 预先生成 submitSum * threadSum 的 键值对， N代表普通请求， F代表无事务依赖请求，
         for (int j=0;j<submitSum*threadSum;j++){
@@ -67,22 +67,22 @@ public class ConcurrentClientMain {
         // 等待上面的线程执行完
         Thread.sleep(10000L);
 
-        // 再来一次
-        List<Record> queryArr2 = new ArrayList<>();
-        for (int j=0;j<submitSum*threadSum;j++){
-            queryArr2.add(new Record(UUID.randomUUID().toString(), j % 4 == 0? "N": "N"));
-        }
-        for (int i = 0; i < threadSum; i++) {
-            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, "F",
-                    queryArr2.subList(i*submitSum, (i+1)*submitSum), submitSum));
-        }
-        Thread.sleep(10000L);
-
-        // 取，验证过程
-        for (Record key: queryArr){
-            readThreadPool.submit(new GetTask(exampleService, key.getKey(), key.getType()));
-        }
-        Thread.sleep(10000L);
+//        // 再来一次
+//        List<Record> queryArr2 = new ArrayList<>();
+//        for (int j=0;j<submitSum*threadSum;j++){
+//            queryArr2.add(new Record(UUID.randomUUID().toString(), j % 4 == 0? "F": "N"));
+//        }
+//        for (int i = 0; i < threadSum; i++) {
+//            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, "F",
+//                    queryArr2.subList(i*submitSum, (i+1)*submitSum), submitSum));
+//        }
+//        Thread.sleep(10000L);
+//
+//        // 取，验证过程
+//        for (Record key: queryArr){
+//            readThreadPool.submit(new GetTask(exampleService, key.getKey(), key.getType()));
+//        }
+        Thread.sleep(100000L);
 //        Thread.sleep(2000L);
 //        for (int i = 0; i < 15; i++) {
 //            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, "N"));
