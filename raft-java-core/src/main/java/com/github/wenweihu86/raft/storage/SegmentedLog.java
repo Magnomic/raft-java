@@ -682,8 +682,8 @@ public class SegmentedLog {
         File file = new File(fileName);
         try (RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw")) {
             RaftFileUtils.writeProtoToFile(randomAccessFile, metaData);
-            LOG.info("new segment meta info, currentTerm={}, votedFor={}, firstLogIndex={}",
-                    metaData.getCurrentTerm(), metaData.getVotedFor(), metaData.getFirstLogIndex());
+//            LOG.info("new segment meta info, currentTerm={}, votedFor={}, firstLogIndex={}",
+//                    metaData.getCurrentTerm(), metaData.getVotedFor(), metaData.getFirstLogIndex());
         } catch (IOException ex) {
             LOG.warn("meta file not exist, name={}", fileName);
         }

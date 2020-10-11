@@ -2,9 +2,9 @@ package com.github.wenweihu86.raft;
 
 import com.baidu.brpc.client.RpcCallback;
 import com.github.wenweihu86.raft.proto.RaftProto;
-import com.github.wenweihu86.raft.storage.Segment;
 import com.github.wenweihu86.raft.storage.SegmentedLog;
 import com.github.wenweihu86.raft.util.ConfigurationUtils;
+import com.github.wenweihu86.raft.util.Res;
 import com.google.protobuf.ByteString;
 import com.github.wenweihu86.raft.storage.Snapshot;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -13,7 +13,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +47,8 @@ public class RaftNode {
     private SegmentedLog raftLog;
     private SegmentedLog raftFutureLog;
     private Snapshot snapshot;
+    private Long lastTimePerK;
+    private Long tpsPerK;
 
     private NodeState state = NodeState.STATE_FOLLOWER;
     // 服务器最后一次知道的任期号（初始化为 0，持续递增）
@@ -91,6 +92,7 @@ public class RaftNode {
         raftFutureLog = new SegmentedLog(raftOptions.getDataDir(), "future", raftOptions.getMaxSegmentFileSize());
         snapshot = new Snapshot(raftOptions.getDataDir());
         snapshot.reload();
+        tpsPerK = 50L;
 
         currentTerm = raftLog.getMetaData().getCurrentTerm();
         votedFor = raftLog.getMetaData().getVotedFor();
@@ -149,14 +151,14 @@ public class RaftNode {
     }
 
     // client set command
-    public boolean replicate(byte[] data, RaftProto.EntryType entryType) {
+    public Res replicate(byte[] data, RaftProto.EntryType entryType) {
         lock.lock();
         long newLastLogIndex = 0;
         try {
             // 如果自己不是Leader且是一个普通的请求
             if (state != NodeState.STATE_LEADER && !entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
                 LOG.debug("I'm not the leader");
-                return false;
+                return new Res(false);
             }
             RaftProto.LogEntry logEntry = RaftProto.LogEntry.newBuilder()
                     .setTerm(currentTerm)
@@ -166,6 +168,7 @@ public class RaftNode {
             entries.add(logEntry);
             // Leader写入entries
             if (!entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
+//            if (1==1) {
                 newLastLogIndex = raftLog.append(entries, raftFutureLog);
             } else {
                 // 得到未来预分配的log index
@@ -176,6 +179,7 @@ public class RaftNode {
 
             // Leader不会发布Future Entries（如果Leader更换位自己，则将未发布的Future Entries转为普通的Entries进行发布）
             if (!entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
+//            if (1==1) {
                 for (RaftProto.Server server : configuration.getServersList()) {
                     final Peer peer = peerMap.get(server.getServerId());
                     executorService.submit(new Runnable() {
@@ -200,7 +204,11 @@ public class RaftNode {
 
             if (raftOptions.isAsyncWrite() || entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
                 // 主节点写成功后，就返回。
-                return true;
+                Res res = new Res();
+                res.setIndex(newLastLogIndex);
+                res.setWait((newLastLogIndex - lastAppliedIndex) * tpsPerK / 1000);
+                res.setSuccess(true);
+                return res;
             }
 
             // sync wait commitIndex >= newLastLogIndex
@@ -218,11 +226,12 @@ public class RaftNode {
         }
 
 
-        LOG.info("{}:\t lastAppliedIndex={} newLastLogIndex={}", entryType, lastAppliedIndex, newLastLogIndex);
+//        LOG.info("{}:\t lastAppliedIndex={} newLastLogIndex={}", entryType, lastAppliedIndex, newLastLogIndex);
         if (lastAppliedIndex < newLastLogIndex) {
-            return false;
+            return new Res(false);
         }
-        return true;
+
+        return new Res(true);
     }
 
     private void appendFutureEntries(Peer peer) {
@@ -999,6 +1008,10 @@ public class RaftNode {
             RaftProto.LogEntry entry = raftLog.getEntry(index);
             if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA || entry.getType() == RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA) {
                 LOG.info("applying for {}", entry.getIndex());
+                if (entry.getIndex() % 1000 == 0){
+                    tpsPerK = System.currentTimeMillis() - lastTimePerK;
+                    lastTimePerK = System.currentTimeMillis();
+                }
                 stateMachine.apply(entry.getData().toByteArray());
             } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
                 applyConfiguration(entry);
@@ -1312,5 +1325,13 @@ public class RaftNode {
 
     public void setRaftFutureLog(SegmentedLog raftFutureLog) {
         this.raftFutureLog = raftFutureLog;
+    }
+
+    public Long getTpsPerK() {
+        return tpsPerK;
+    }
+
+    public void setTpsPerK(Long tpsPerK) {
+        this.tpsPerK = tpsPerK;
     }
 }

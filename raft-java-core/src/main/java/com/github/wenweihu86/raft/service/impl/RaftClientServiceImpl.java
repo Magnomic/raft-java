@@ -5,6 +5,7 @@ import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftClientService;
 import com.github.wenweihu86.raft.util.ConfigurationUtils;
+import com.github.wenweihu86.raft.util.Res;
 import com.googlecode.protobuf.format.JsonFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -144,8 +145,8 @@ public class RaftClientServiceImpl implements RaftClientService {
             } finally {
                 raftNode.getLock().unlock();
             }
-            boolean success = raftNode.replicate(configurationData, RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION);
-            if (success) {
+            Res res = raftNode.replicate(configurationData, RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION);
+            if (res.isSuccess()) {
                 responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS);
             }
         }
@@ -203,8 +204,8 @@ public class RaftClientServiceImpl implements RaftClientService {
         } finally {
             raftNode.getLock().unlock();
         }
-        boolean success = raftNode.replicate(configurationData, RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION);
-        if (success) {
+        Res res = raftNode.replicate(configurationData, RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION);
+        if (res.isSuccess()) {
             responseBuilder.setResCode(RaftProto.ResCode.RES_CODE_SUCCESS);
         }
 

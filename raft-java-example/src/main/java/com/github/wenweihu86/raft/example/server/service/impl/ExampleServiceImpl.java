@@ -3,13 +3,14 @@ package com.github.wenweihu86.raft.example.server.service.impl;
 import com.baidu.brpc.client.BrpcProxy;
 import com.baidu.brpc.client.RpcClient;
 import com.baidu.brpc.client.RpcClientOptions;
-import com.baidu.brpc.client.instance.Endpoint;
+import com.baidu.brpc.client.channel.Endpoint;
 import com.github.wenweihu86.raft.Peer;
 import com.github.wenweihu86.raft.example.server.ExampleStateMachine;
 import com.github.wenweihu86.raft.example.server.service.ExampleProto;
 import com.github.wenweihu86.raft.example.server.service.ExampleService;
 import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.proto.RaftProto;
+import com.github.wenweihu86.raft.util.Res;
 import com.googlecode.protobuf.format.JsonFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +65,11 @@ public class ExampleServiceImpl implements ExampleService {
     public ExampleProto.SetResponse set(ExampleProto.SetRequest request) {
         ExampleProto.SetResponse.Builder responseBuilder = ExampleProto.SetResponse.newBuilder();
         // 如果没Leader
-        if (request.getType().equals("N")){
-            LOG.info("received Normal request!");
-        } else {
-            LOG.info("received Future requests!");
-        }
+//        if (request.getType().equals("N")){
+//            LOG.info("received Normal request!");
+//        } else {
+//            LOG.info("received Future requests!");
+//        }
         if (raftNode.getLeaderId() <= 0) {
             responseBuilder.setSuccess(false);
             // 如果自己不是leader，将写请求转发给leader
@@ -83,35 +84,46 @@ public class ExampleServiceImpl implements ExampleService {
                 ExampleProto.SetResponse responseFromLeader = exampleService.set(request);
                 responseBuilder.mergeFrom(responseFromLeader);
             } else {
-                LOG.info("Publish new future transaction");
+//                LOG.info("Publish new future transaction");
                 // 如果是Future data，向各节点发送数据追加请求
                 byte[] data = request.toByteArray();
-                boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA);
-                responseBuilder.setSuccess(success);
+                Res res = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA);
+                responseBuilder.setWait(res.getWait());
+                responseBuilder.setIndex(res.getIndex());
+                responseBuilder.setSuccess(res.isSuccess());
             }
         } else {
             if (request.getType().equals("N") || request.getType().equals("F")) {
                 // 如果自己是Leader，数据同步写入raft集群
                 byte[] data = request.toByteArray();
-                boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_DATA);
-                responseBuilder.setSuccess(success);
+                Res res = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_DATA);
+                responseBuilder.setSuccess(res.isSuccess());
             } else if (request.getType().equals("C")){
                 // 如果自己是Leader，数据同步写入raft集群
                 byte[] data = request.toByteArray();
-                boolean success = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION);
-                responseBuilder.setSuccess(success);
+                Res res = raftNode.replicate(data, RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION);
+                responseBuilder.setSuccess(res.isSuccess());
             }
         }
 
         ExampleProto.SetResponse response = responseBuilder.build();
-        LOG.info("set request, request={}, response={}", jsonFormat.printToString(request),
-                jsonFormat.printToString(response));
+//        LOG.info("set request, request={}, response={}", jsonFormat.printToString(request),
+//                jsonFormat.printToString(response));
         return response;
     }
 
     @Override
     public ExampleProto.GetResponse get(ExampleProto.GetRequest request) {
-        ExampleProto.GetResponse response = stateMachine.get(request);
+        ExampleProto.GetResponse.Builder responseBuilder = ExampleProto.GetResponse.newBuilder();
+        byte[] valueBytes = stateMachine.get(request);
+        if (valueBytes != null) {
+            String value = new String(valueBytes);
+            responseBuilder.setValue(value);
+        } else if (request.getIndex()!=0) {
+            responseBuilder.setIndex(request.getIndex());
+            responseBuilder.setWait((request.getIndex() - raftNode.getLastAppliedIndex()) * raftNode.getTpsPerK() / 1000);
+        }
+        ExampleProto.GetResponse response = responseBuilder.build();
         LOG.info("get request, request={}, response={}", jsonFormat.printToString(request),
                 jsonFormat.printToString(response));
         return response;

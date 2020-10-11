@@ -2,7 +2,7 @@ package com.github.wenweihu86.raft;
 
 import com.baidu.brpc.client.BrpcProxy;
 import com.baidu.brpc.client.RpcClient;
-import com.baidu.brpc.client.instance.Endpoint;
+import com.baidu.brpc.client.channel.Endpoint;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftConsensusServiceAsync;
 

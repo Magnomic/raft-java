@@ -53,7 +53,7 @@ public class Segment {
         if (index - startIndex > fixedWindowSize) return null;
         if (futureEntries.get(innerIndex).entry == null) return null;
         if (futureEntries.get(innerIndex).entry.getIndex() != index) {
-            System.out.println(String.format("!!!!!!!!!!!!!!!! entry not same, %d %d",futureEntries.get(innerIndex).entry.getIndex(),index));
+//            System.out.println(String.format("!!!!!!!!!!!!!!!! entry not same, %d %d",futureEntries.get(innerIndex).entry.getIndex(),index));
             return null;
         }
         return futureEntries.get(innerIndex).entry;

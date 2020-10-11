@@ -803,6 +803,26 @@ public final class ExampleProto {
      * <code>optional bool success = 1;</code>
      */
     boolean getSuccess();
+
+    // optional int64 wait = 2;
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    boolean hasWait();
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    long getWait();
+
+    // optional int64 index = 3;
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    boolean hasIndex();
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    long getIndex();
   }
   /**
    * Protobuf type {@code service.SetResponse}
@@ -858,6 +878,16 @@ public final class ExampleProto {
             case 8: {
               bitField0_ |= 0x00000001;
               success_ = input.readBool();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              wait_ = input.readInt64();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              index_ = input.readInt64();
               break;
             }
           }
@@ -916,8 +946,42 @@ public final class ExampleProto {
       return success_;
     }
 
+    // optional int64 wait = 2;
+    public static final int WAIT_FIELD_NUMBER = 2;
+    private long wait_;
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    public boolean hasWait() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    public long getWait() {
+      return wait_;
+    }
+
+    // optional int64 index = 3;
+    public static final int INDEX_FIELD_NUMBER = 3;
+    private long index_;
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    public boolean hasIndex() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    public long getIndex() {
+      return index_;
+    }
+
     private void initFields() {
       success_ = false;
+      wait_ = 0L;
+      index_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -934,6 +998,12 @@ public final class ExampleProto {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBool(1, success_);
       }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt64(2, wait_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, index_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -946,6 +1016,14 @@ public final class ExampleProto {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, success_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, wait_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, index_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1065,6 +1143,10 @@ public final class ExampleProto {
         super.clear();
         success_ = false;
         bitField0_ = (bitField0_ & ~0x00000001);
+        wait_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        index_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -1097,6 +1179,14 @@ public final class ExampleProto {
           to_bitField0_ |= 0x00000001;
         }
         result.success_ = success_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.wait_ = wait_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.index_ = index_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1115,6 +1205,12 @@ public final class ExampleProto {
         if (other == SetResponse.getDefaultInstance()) return this;
         if (other.hasSuccess()) {
           setSuccess(other.getSuccess());
+        }
+        if (other.hasWait()) {
+          setWait(other.getWait());
+        }
+        if (other.hasIndex()) {
+          setIndex(other.getIndex());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1176,6 +1272,72 @@ public final class ExampleProto {
         return this;
       }
 
+      // optional int64 wait = 2;
+      private long wait_ ;
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public boolean hasWait() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public long getWait() {
+        return wait_;
+      }
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public Builder setWait(long value) {
+        bitField0_ |= 0x00000002;
+        wait_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public Builder clearWait() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        wait_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional int64 index = 3;
+      private long index_ ;
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public boolean hasIndex() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public long getIndex() {
+        return index_;
+      }
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public Builder setIndex(long value) {
+        bitField0_ |= 0x00000004;
+        index_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public Builder clearIndex() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        index_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:service.SetResponse)
     }
 
@@ -1204,6 +1366,16 @@ public final class ExampleProto {
      */
     com.google.protobuf.ByteString
         getKeyBytes();
+
+    // optional int64 index = 2;
+    /**
+     * <code>optional int64 index = 2;</code>
+     */
+    boolean hasIndex();
+    /**
+     * <code>optional int64 index = 2;</code>
+     */
+    long getIndex();
   }
   /**
    * Protobuf type {@code service.GetRequest}
@@ -1259,6 +1431,11 @@ public final class ExampleProto {
             case 10: {
               bitField0_ |= 0x00000001;
               key_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              index_ = input.readInt64();
               break;
             }
           }
@@ -1344,8 +1521,25 @@ public final class ExampleProto {
       }
     }
 
+    // optional int64 index = 2;
+    public static final int INDEX_FIELD_NUMBER = 2;
+    private long index_;
+    /**
+     * <code>optional int64 index = 2;</code>
+     */
+    public boolean hasIndex() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int64 index = 2;</code>
+     */
+    public long getIndex() {
+      return index_;
+    }
+
     private void initFields() {
       key_ = "";
+      index_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1362,6 +1556,9 @@ public final class ExampleProto {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBytes(1, getKeyBytes());
       }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt64(2, index_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -1374,6 +1571,10 @@ public final class ExampleProto {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, getKeyBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, index_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1493,6 +1694,8 @@ public final class ExampleProto {
         super.clear();
         key_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
+        index_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
         return this;
       }
 
@@ -1525,6 +1728,10 @@ public final class ExampleProto {
           to_bitField0_ |= 0x00000001;
         }
         result.key_ = key_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.index_ = index_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1545,6 +1752,9 @@ public final class ExampleProto {
           bitField0_ |= 0x00000001;
           key_ = other.key_;
           onChanged();
+        }
+        if (other.hasIndex()) {
+          setIndex(other.getIndex());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1647,6 +1857,39 @@ public final class ExampleProto {
         return this;
       }
 
+      // optional int64 index = 2;
+      private long index_ ;
+      /**
+       * <code>optional int64 index = 2;</code>
+       */
+      public boolean hasIndex() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int64 index = 2;</code>
+       */
+      public long getIndex() {
+        return index_;
+      }
+      /**
+       * <code>optional int64 index = 2;</code>
+       */
+      public Builder setIndex(long value) {
+        bitField0_ |= 0x00000002;
+        index_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 index = 2;</code>
+       */
+      public Builder clearIndex() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        index_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:service.GetRequest)
     }
 
@@ -1675,6 +1918,26 @@ public final class ExampleProto {
      */
     com.google.protobuf.ByteString
         getValueBytes();
+
+    // optional int64 wait = 2;
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    boolean hasWait();
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    long getWait();
+
+    // optional int64 index = 3;
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    boolean hasIndex();
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    long getIndex();
   }
   /**
    * Protobuf type {@code service.GetResponse}
@@ -1730,6 +1993,16 @@ public final class ExampleProto {
             case 10: {
               bitField0_ |= 0x00000001;
               value_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              wait_ = input.readInt64();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              index_ = input.readInt64();
               break;
             }
           }
@@ -1815,8 +2088,42 @@ public final class ExampleProto {
       }
     }
 
+    // optional int64 wait = 2;
+    public static final int WAIT_FIELD_NUMBER = 2;
+    private long wait_;
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    public boolean hasWait() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int64 wait = 2;</code>
+     */
+    public long getWait() {
+      return wait_;
+    }
+
+    // optional int64 index = 3;
+    public static final int INDEX_FIELD_NUMBER = 3;
+    private long index_;
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    public boolean hasIndex() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int64 index = 3;</code>
+     */
+    public long getIndex() {
+      return index_;
+    }
+
     private void initFields() {
       value_ = "";
+      wait_ = 0L;
+      index_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1833,6 +2140,12 @@ public final class ExampleProto {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeBytes(1, getValueBytes());
       }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt64(2, wait_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, index_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -1845,6 +2158,14 @@ public final class ExampleProto {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(1, getValueBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, wait_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, index_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1964,6 +2285,10 @@ public final class ExampleProto {
         super.clear();
         value_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
+        wait_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        index_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -1996,6 +2321,14 @@ public final class ExampleProto {
           to_bitField0_ |= 0x00000001;
         }
         result.value_ = value_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.wait_ = wait_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.index_ = index_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -2016,6 +2349,12 @@ public final class ExampleProto {
           bitField0_ |= 0x00000001;
           value_ = other.value_;
           onChanged();
+        }
+        if (other.hasWait()) {
+          setWait(other.getWait());
+        }
+        if (other.hasIndex()) {
+          setIndex(other.getIndex());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -2118,6 +2457,72 @@ public final class ExampleProto {
         return this;
       }
 
+      // optional int64 wait = 2;
+      private long wait_ ;
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public boolean hasWait() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public long getWait() {
+        return wait_;
+      }
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public Builder setWait(long value) {
+        bitField0_ |= 0x00000002;
+        wait_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 wait = 2;</code>
+       */
+      public Builder clearWait() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        wait_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional int64 index = 3;
+      private long index_ ;
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public boolean hasIndex() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public long getIndex() {
+        return index_;
+      }
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public Builder setIndex(long value) {
+        bitField0_ |= 0x00000004;
+        index_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 index = 3;</code>
+       */
+      public Builder clearIndex() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        index_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:service.GetResponse)
     }
 
@@ -2160,10 +2565,12 @@ public final class ExampleProto {
     String[] descriptorData = {
       "\n\rexample.proto\022\007service\"6\n\nSetRequest\022\013" +
       "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\022\014\n\004type\030\003 \001(\t" +
-      "\"\036\n\013SetResponse\022\017\n\007success\030\001 \001(\010\"\031\n\nGetR" +
-      "equest\022\013\n\003key\030\001 \001(\t\"\034\n\013GetResponse\022\r\n\005va" +
-      "lue\030\001 \001(\tBA\n1com.github.wenweihu86.raft." +
-      "example.server.serviceB\014ExampleProto"
+      "\";\n\013SetResponse\022\017\n\007success\030\001 \001(\010\022\014\n\004wait" +
+      "\030\002 \001(\003\022\r\n\005index\030\003 \001(\003\"(\n\nGetRequest\022\013\n\003k" +
+      "ey\030\001 \001(\t\022\r\n\005index\030\002 \001(\003\"9\n\013GetResponse\022\r" +
+      "\n\005value\030\001 \001(\t\022\014\n\004wait\030\002 \001(\003\022\r\n\005index\030\003 \001" +
+      "(\003BA\n1com.github.wenweihu86.raft.example" +
+      ".server.serviceB\014ExampleProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2181,19 +2588,19 @@ public final class ExampleProto {
           internal_static_service_SetResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_service_SetResponse_descriptor,
-              new String[] { "Success", });
+              new String[] { "Success", "Wait", "Index", });
           internal_static_service_GetRequest_descriptor =
             getDescriptor().getMessageTypes().get(2);
           internal_static_service_GetRequest_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_service_GetRequest_descriptor,
-              new String[] { "Key", });
+              new String[] { "Key", "Index", });
           internal_static_service_GetResponse_descriptor =
             getDescriptor().getMessageTypes().get(3);
           internal_static_service_GetResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_service_GetResponse_descriptor,
-              new String[] { "Value", });
+              new String[] { "Value", "Wait", "Index", });
           return null;
         }
       };

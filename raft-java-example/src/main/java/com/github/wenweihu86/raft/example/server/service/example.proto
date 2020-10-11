@@ -12,13 +12,18 @@ message SetRequest {
 
 message SetResponse {
     optional bool success = 1;
+    optional int64 wait = 2;
+    optional int64 index = 3;
 }
 
 message GetRequest {
     optional string key = 1;
+    optional int64 index = 2;
 }
 
 message GetResponse {
     optional string value = 1;
+    optional int64 wait = 2;
+    optional int64 index = 3;
 }
 

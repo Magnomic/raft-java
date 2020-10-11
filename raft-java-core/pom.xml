@@ -172,7 +172,7 @@
         <dependency>
             <groupId>com.baidu</groupId>
             <artifactId>brpc-java</artifactId>
-            <version>2.5.9</version>
+            <version>3.0.2</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

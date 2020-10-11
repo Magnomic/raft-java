@@ -3,7 +3,7 @@ package com.github.wenweihu86.raft.service.impl;
 import com.baidu.brpc.client.BrpcProxy;
 import com.baidu.brpc.client.RpcClient;
 import com.baidu.brpc.client.RpcClientOptions;
-import com.baidu.brpc.client.instance.Endpoint;
+import com.baidu.brpc.client.channel.Endpoint;
 import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftConsensusService;
@@ -313,7 +313,7 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                         // ServerID是从1开始的，所以 serverID也要 mod Server Count
                         if (entry.getIndex() % raftNode.getConfiguration().getServersCount()
                                 == raftNode.getLocalServer().getServerId() % raftNode.getConfiguration().getServersCount()){
-                            LOG.info("MEETS ENTRY LEADER MISSED!!! entry index is {}, data is {}", entry.getIndex(), entry);
+//                            LOG.info("MEETS ENTRY LEADER MISSED!!! entry index is {}, data is {}", entry.getIndex(), entry);
                             // 如果是我自己产生的Future Entry，重新发布新的Future Entry
                             // 别人的就不要管了，让他自己去生成
                             // 写入Future Log

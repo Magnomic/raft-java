@@ -82,17 +82,11 @@ public class ExampleStateMachine implements StateMachine {
         }
     }
 
-    public ExampleProto.GetResponse get(ExampleProto.GetRequest request) {
+    public byte[] get(ExampleProto.GetRequest request) {
         try {
-            ExampleProto.GetResponse.Builder responseBuilder = ExampleProto.GetResponse.newBuilder();
             byte[] keyBytes = request.getKey().getBytes();
             byte[] valueBytes = db.get(keyBytes);
-            if (valueBytes != null) {
-                String value = new String(valueBytes);
-                responseBuilder.setValue(value);
-            }
-            ExampleProto.GetResponse response = responseBuilder.build();
-            return response;
+            return valueBytes;
         } catch (RocksDBException ex) {
             LOG.warn("read rockdb error, msg={}", ex.getMessage());
             return null;
