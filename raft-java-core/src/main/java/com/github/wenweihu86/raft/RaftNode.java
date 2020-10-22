@@ -2,6 +2,7 @@ package com.github.wenweihu86.raft;
 
 import com.baidu.brpc.client.RpcCallback;
 import com.github.wenweihu86.raft.proto.RaftProto;
+import com.github.wenweihu86.raft.storage.Segment;
 import com.github.wenweihu86.raft.storage.SegmentedLog;
 import com.github.wenweihu86.raft.util.ConfigurationUtils;
 import com.github.wenweihu86.raft.util.Res;
@@ -49,7 +50,7 @@ public class RaftNode {
     private Snapshot snapshot;
     private Long lastTimePerK;
     private Long tpsPerK;
-
+    private Integer step;
     private NodeState state = NodeState.STATE_FOLLOWER;
     // 服务器最后一次知道的任期号（初始化为 0，持续递增）
     private long currentTerm;
@@ -92,8 +93,9 @@ public class RaftNode {
         raftFutureLog = new SegmentedLog(raftOptions.getDataDir(), "future", raftOptions.getMaxSegmentFileSize());
         snapshot = new Snapshot(raftOptions.getDataDir());
         snapshot.reload();
-        tpsPerK = 50L;
-
+        tpsPerK = 1000L;
+        lastTimePerK = 0L;
+        step = 0;
         currentTerm = raftLog.getMetaData().getCurrentTerm();
         votedFor = raftLog.getMetaData().getVotedFor();
         commitIndex = Math.max(snapshot.getMetaData().getLastIncludedIndex(), raftLog.getMetaData().getCommitIndex());
@@ -169,6 +171,22 @@ public class RaftNode {
             // Leader写入entries
             if (!entryType.equals(RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA)) {
 //            if (1==1) {
+                LOG.info("LastFutureLogIndex:{}, LastLogIndex:{}, step:{}",raftFutureLog.getLastFutureLogIndex(),
+                        raftLog.getLastLogIndex(), step);
+                if (raftFutureLog.getStartFutureLogIndexSegmentMap().size() !=0 && raftLog.getLastLogIndex() < raftFutureLog.getStartFutureLogIndexSegmentMap().lastKey() - Segment.fixedWindowSize){
+                    step += 1;
+                } else {
+                    step = 0;
+                }
+                for (long i=0;i<step;i++){
+                    List<RaftProto.LogEntry> tempEntries = new ArrayList<>();
+                    tempEntries.add(RaftProto.LogEntry
+                            .newBuilder()
+                            .setTerm(currentTerm)
+                            .setType(RaftProto.EntryType.ENTRY_TYPE_EMPTY_DATA)
+                            .build());
+                    raftLog.append(tempEntries, raftFutureLog);
+                }
                 newLastLogIndex = raftLog.append(entries, raftFutureLog);
             } else {
                 // 得到未来预分配的log index
@@ -206,8 +224,10 @@ public class RaftNode {
                 // 主节点写成功后，就返回。
                 Res res = new Res();
                 res.setIndex(newLastLogIndex);
-                res.setWait((newLastLogIndex - lastAppliedIndex) * tpsPerK / 1000);
+                res.setWait((newLastLogIndex - lastAppliedIndex) * tpsPerK / 1000 + 50);
                 res.setSuccess(true);
+//                LOG.info("Make this request wait for {} ms, its index is {}, current index is {}, tps is {}",
+//                        (newLastLogIndex - lastAppliedIndex) * tpsPerK / 1000, newLastLogIndex, lastAppliedIndex, tpsPerK);
                 return res;
             }
 
@@ -1333,5 +1353,13 @@ public class RaftNode {
 
     public void setTpsPerK(Long tpsPerK) {
         this.tpsPerK = tpsPerK;
+    }
+
+    public Long getLastTimePerK() {
+        return lastTimePerK;
+    }
+
+    public void setLastTimePerK(Long lastTimePerK) {
+        this.lastTimePerK = lastTimePerK;
     }
 }

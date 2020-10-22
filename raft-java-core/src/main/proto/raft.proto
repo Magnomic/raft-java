@@ -15,6 +15,7 @@ enum EntryType {
     ENTRY_TYPE_CONFIGURATION= 1;
     ENTRY_TYPE_FUTURE_DATA=2;
     ENTRY_TYPE_SIGNAL_DATA=3;
+    ENTRY_TYPE_EMPTY_DATA=4;
 };
 
 message Endpoint {
@@ -78,8 +79,8 @@ message AppendEntriesResponse {
     optional ResCode res_code = 1; // 跟随者包含了匹配上 prevLogIndex 和 prevLogTerm 的日志时为真
     optional uint64 term = 2; // 当前的任期号，用于领导人去更新自己
     optional uint64 last_log_index = 3;
-    optional uint64 future_term = 4;
-    optional uint64 last_future_log_index = 5;
+    optional uint64 last_future_log_index = 4;
+    optional uint64 future_term = 5;
 };
 
 message InstallSnapshotRequest {

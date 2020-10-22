@@ -25,7 +25,7 @@ public class Segment {
         }
     }
 
-    public static int fixedWindowSize = 400;
+    public static int fixedWindowSize = 300;
     private long futureEndIndex;
     private boolean canWrite;
     private long startIndex;

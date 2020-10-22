@@ -1,6 +1,5 @@
 package com.github.wenweihu86.raft.admin;
 
-import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftClientService;
 import com.googlecode.protobuf.format.JsonFormat;
 import org.apache.commons.lang3.Validate;

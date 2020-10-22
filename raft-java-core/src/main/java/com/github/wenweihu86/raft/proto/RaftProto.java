@@ -120,6 +120,10 @@ public final class RaftProto {
      * <code>ENTRY_TYPE_SIGNAL_DATA = 3;</code>
      */
     ENTRY_TYPE_SIGNAL_DATA(3, 3),
+    /**
+     * <code>ENTRY_TYPE_EMPTY_DATA = 4;</code>
+     */
+    ENTRY_TYPE_EMPTY_DATA(4, 4),
     ;
 
     /**
@@ -138,6 +142,10 @@ public final class RaftProto {
      * <code>ENTRY_TYPE_SIGNAL_DATA = 3;</code>
      */
     public static final int ENTRY_TYPE_SIGNAL_DATA_VALUE = 3;
+    /**
+     * <code>ENTRY_TYPE_EMPTY_DATA = 4;</code>
+     */
+    public static final int ENTRY_TYPE_EMPTY_DATA_VALUE = 4;
 
 
     public final int getNumber() { return value; }
@@ -148,6 +156,7 @@ public final class RaftProto {
         case 1: return ENTRY_TYPE_CONFIGURATION;
         case 2: return ENTRY_TYPE_FUTURE_DATA;
         case 3: return ENTRY_TYPE_SIGNAL_DATA;
+        case 4: return ENTRY_TYPE_EMPTY_DATA;
         default: return null;
       }
     }
@@ -7238,25 +7247,25 @@ public final class RaftProto {
      */
     long getLastLogIndex();
 
-    // optional uint64 future_term = 4;
+    // optional uint64 last_future_log_index = 4;
     /**
-     * <code>optional uint64 future_term = 4;</code>
-     */
-    boolean hasFutureTerm();
-    /**
-     * <code>optional uint64 future_term = 4;</code>
-     */
-    long getFutureTerm();
-
-    // optional uint64 last_future_log_index = 5;
-    /**
-     * <code>optional uint64 last_future_log_index = 5;</code>
+     * <code>optional uint64 last_future_log_index = 4;</code>
      */
     boolean hasLastFutureLogIndex();
     /**
-     * <code>optional uint64 last_future_log_index = 5;</code>
+     * <code>optional uint64 last_future_log_index = 4;</code>
      */
     long getLastFutureLogIndex();
+
+    // optional uint64 future_term = 5;
+    /**
+     * <code>optional uint64 future_term = 5;</code>
+     */
+    boolean hasFutureTerm();
+    /**
+     * <code>optional uint64 future_term = 5;</code>
+     */
+    long getFutureTerm();
   }
   /**
    * Protobuf type {@code raft.AppendEntriesResponse}
@@ -7332,12 +7341,12 @@ public final class RaftProto {
             }
             case 32: {
               bitField0_ |= 0x00000008;
-              futureTerm_ = input.readUInt64();
+              lastFutureLogIndex_ = input.readUInt64();
               break;
             }
             case 40: {
               bitField0_ |= 0x00000010;
-              lastFutureLogIndex_ = input.readUInt64();
+              futureTerm_ = input.readUInt64();
               break;
             }
           }
@@ -7444,44 +7453,44 @@ public final class RaftProto {
       return lastLogIndex_;
     }
 
-    // optional uint64 future_term = 4;
-    public static final int FUTURE_TERM_FIELD_NUMBER = 4;
-    private long futureTerm_;
+    // optional uint64 last_future_log_index = 4;
+    public static final int LAST_FUTURE_LOG_INDEX_FIELD_NUMBER = 4;
+    private long lastFutureLogIndex_;
     /**
-     * <code>optional uint64 future_term = 4;</code>
+     * <code>optional uint64 last_future_log_index = 4;</code>
      */
-    public boolean hasFutureTerm() {
+    public boolean hasLastFutureLogIndex() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional uint64 future_term = 4;</code>
-     */
-    public long getFutureTerm() {
-      return futureTerm_;
-    }
-
-    // optional uint64 last_future_log_index = 5;
-    public static final int LAST_FUTURE_LOG_INDEX_FIELD_NUMBER = 5;
-    private long lastFutureLogIndex_;
-    /**
-     * <code>optional uint64 last_future_log_index = 5;</code>
-     */
-    public boolean hasLastFutureLogIndex() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional uint64 last_future_log_index = 5;</code>
+     * <code>optional uint64 last_future_log_index = 4;</code>
      */
     public long getLastFutureLogIndex() {
       return lastFutureLogIndex_;
+    }
+
+    // optional uint64 future_term = 5;
+    public static final int FUTURE_TERM_FIELD_NUMBER = 5;
+    private long futureTerm_;
+    /**
+     * <code>optional uint64 future_term = 5;</code>
+     */
+    public boolean hasFutureTerm() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional uint64 future_term = 5;</code>
+     */
+    public long getFutureTerm() {
+      return futureTerm_;
     }
 
     private void initFields() {
       resCode_ = ResCode.RES_CODE_SUCCESS;
       term_ = 0L;
       lastLogIndex_ = 0L;
-      futureTerm_ = 0L;
       lastFutureLogIndex_ = 0L;
+      futureTerm_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -7505,10 +7514,10 @@ public final class RaftProto {
         output.writeUInt64(3, lastLogIndex_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeUInt64(4, futureTerm_);
+        output.writeUInt64(4, lastFutureLogIndex_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeUInt64(5, lastFutureLogIndex_);
+        output.writeUInt64(5, futureTerm_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -7533,11 +7542,11 @@ public final class RaftProto {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(4, futureTerm_);
+          .computeUInt64Size(4, lastFutureLogIndex_);
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(5, lastFutureLogIndex_);
+          .computeUInt64Size(5, futureTerm_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -7661,9 +7670,9 @@ public final class RaftProto {
         bitField0_ = (bitField0_ & ~0x00000002);
         lastLogIndex_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
-        futureTerm_ = 0L;
-        bitField0_ = (bitField0_ & ~0x00000008);
         lastFutureLogIndex_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        futureTerm_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
@@ -7708,11 +7717,11 @@ public final class RaftProto {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        result.futureTerm_ = futureTerm_;
+        result.lastFutureLogIndex_ = lastFutureLogIndex_;
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
         }
-        result.lastFutureLogIndex_ = lastFutureLogIndex_;
+        result.futureTerm_ = futureTerm_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -7738,11 +7747,11 @@ public final class RaftProto {
         if (other.hasLastLogIndex()) {
           setLastLogIndex(other.getLastLogIndex());
         }
-        if (other.hasFutureTerm()) {
-          setFutureTerm(other.getFutureTerm());
-        }
         if (other.hasLastFutureLogIndex()) {
           setLastFutureLogIndex(other.getLastFutureLogIndex());
+        }
+        if (other.hasFutureTerm()) {
+          setFutureTerm(other.getFutureTerm());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -7905,68 +7914,68 @@ public final class RaftProto {
         return this;
       }
 
-      // optional uint64 future_term = 4;
-      private long futureTerm_ ;
+      // optional uint64 last_future_log_index = 4;
+      private long lastFutureLogIndex_ ;
       /**
-       * <code>optional uint64 future_term = 4;</code>
+       * <code>optional uint64 last_future_log_index = 4;</code>
        */
-      public boolean hasFutureTerm() {
+      public boolean hasLastFutureLogIndex() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional uint64 future_term = 4;</code>
-       */
-      public long getFutureTerm() {
-        return futureTerm_;
-      }
-      /**
-       * <code>optional uint64 future_term = 4;</code>
-       */
-      public Builder setFutureTerm(long value) {
-        bitField0_ |= 0x00000008;
-        futureTerm_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional uint64 future_term = 4;</code>
-       */
-      public Builder clearFutureTerm() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        futureTerm_ = 0L;
-        onChanged();
-        return this;
-      }
-
-      // optional uint64 last_future_log_index = 5;
-      private long lastFutureLogIndex_ ;
-      /**
-       * <code>optional uint64 last_future_log_index = 5;</code>
-       */
-      public boolean hasLastFutureLogIndex() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
-      }
-      /**
-       * <code>optional uint64 last_future_log_index = 5;</code>
+       * <code>optional uint64 last_future_log_index = 4;</code>
        */
       public long getLastFutureLogIndex() {
         return lastFutureLogIndex_;
       }
       /**
-       * <code>optional uint64 last_future_log_index = 5;</code>
+       * <code>optional uint64 last_future_log_index = 4;</code>
        */
       public Builder setLastFutureLogIndex(long value) {
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         lastFutureLogIndex_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional uint64 last_future_log_index = 5;</code>
+       * <code>optional uint64 last_future_log_index = 4;</code>
        */
       public Builder clearLastFutureLogIndex() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
         lastFutureLogIndex_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // optional uint64 future_term = 5;
+      private long futureTerm_ ;
+      /**
+       * <code>optional uint64 future_term = 5;</code>
+       */
+      public boolean hasFutureTerm() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional uint64 future_term = 5;</code>
+       */
+      public long getFutureTerm() {
+        return futureTerm_;
+      }
+      /**
+       * <code>optional uint64 future_term = 5;</code>
+       */
+      public Builder setFutureTerm(long value) {
+        bitField0_ |= 0x00000010;
+        futureTerm_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 future_term = 5;</code>
+       */
+      public Builder clearFutureTerm() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        futureTerm_ = 0L;
         onChanged();
         return this;
       }
@@ -14708,8 +14717,8 @@ public final class RaftProto {
       "ry\022%\n\rfutureEntries\030\007 \003(\0132\016.raft.LogEntr" +
       "y\"\222\001\n\025AppendEntriesResponse\022\037\n\010res_code\030" +
       "\001 \001(\0162\r.raft.ResCode\022\014\n\004term\030\002 \001(\004\022\026\n\016la" +
-      "st_log_index\030\003 \001(\004\022\023\n\013future_term\030\004 \001(\004\022" +
-      "\035\n\025last_future_log_index\030\005 \001(\004\"\301\001\n\026Insta" +
+      "st_log_index\030\003 \001(\004\022\035\n\025last_future_log_in" +
+      "dex\030\004 \001(\004\022\023\n\013future_term\030\005 \001(\004\"\301\001\n\026Insta" +
       "llSnapshotRequest\022\021\n\tserver_id\030\001 \001(\r\022\014\n\004" +
       "term\030\002 \001(\004\0222\n\022snapshot_meta_data\030\003 \001(\0132\026" +
       ".raft.SnapshotMetaData\022\021\n\tfile_name\030\004 \001(" +
@@ -14731,11 +14740,12 @@ public final class RaftProto {
       "\n\007res_msg\030\002 \001(\t\022\034\n\006leader\030\003 \001(\0132\014.raft.S" +
       "erver\022\035\n\007servers\030\004 \003(\0132\014.raft.Server*K\n\007" +
       "ResCode\022\024\n\020RES_CODE_SUCCESS\020\000\022\021\n\rRES_COD" +
-      "E_FAIL\020\001\022\027\n\023RES_CODE_NOT_LEADER\020\002*v\n\tEnt" +
-      "ryType\022\023\n\017ENTRY_TYPE_DATA\020\000\022\034\n\030ENTRY_TYP" +
-      "E_CONFIGURATION\020\001\022\032\n\026ENTRY_TYPE_FUTURE_D" +
-      "ATA\020\002\022\032\n\026ENTRY_TYPE_SIGNAL_DATA\020\003B-\n com",
-      ".github.wenweihu86.raft.protoB\tRaftProto"
+      "E_FAIL\020\001\022\027\n\023RES_CODE_NOT_LEADER\020\002*\221\001\n\tEn" +
+      "tryType\022\023\n\017ENTRY_TYPE_DATA\020\000\022\034\n\030ENTRY_TY" +
+      "PE_CONFIGURATION\020\001\022\032\n\026ENTRY_TYPE_FUTURE_" +
+      "DATA\020\002\022\032\n\026ENTRY_TYPE_SIGNAL_DATA\020\003\022\031\n\025EN",
+      "TRY_TYPE_EMPTY_DATA\020\004B-\n com.github.wenw" +
+      "eihu86.raft.protoB\tRaftProto"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -14801,7 +14811,7 @@ public final class RaftProto {
           internal_static_raft_AppendEntriesResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_raft_AppendEntriesResponse_descriptor,
-              new String[] { "ResCode", "Term", "LastLogIndex", "FutureTerm", "LastFutureLogIndex", });
+              new String[] { "ResCode", "Term", "LastLogIndex", "LastFutureLogIndex", "FutureTerm", });
           internal_static_raft_InstallSnapshotRequest_descriptor =
             getDescriptor().getMessageTypes().get(10);
           internal_static_raft_InstallSnapshotRequest_fieldAccessorTable = new

@@ -1,10 +1,8 @@
 package com.github.wenweihu86.raft.storage;
 
-import com.github.wenweihu86.raft.RaftOptions;
-import com.github.wenweihu86.raft.util.RaftFileUtils;
 import com.github.wenweihu86.raft.proto.RaftProto;
+import com.github.wenweihu86.raft.util.RaftFileUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -339,6 +337,7 @@ public class SegmentedLog {
         newLastLogIndex = this.getLastLogIndex();
         for (RaftProto.LogEntry entry : entries) {
             newLastLogIndex++;
+            LOG.info("now Last log index is {}", newLastLogIndex);
 //            LOG.info("My future map is {}", futureLog.startFutureLogIndexSegmentMap.keySet());
             LOG.info("entry.getIndex() =  {}", entry.getIndex());
 //            LOG.info("lowerEntry of future map is {}", futureLog.startFutureLogIndexSegmentMap.lowerEntry(newLastLogIndex));

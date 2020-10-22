@@ -1,9 +1,5 @@
 package com.github.wenweihu86.raft.service.impl;
 
-import com.baidu.brpc.client.BrpcProxy;
-import com.baidu.brpc.client.RpcClient;
-import com.baidu.brpc.client.RpcClientOptions;
-import com.baidu.brpc.client.channel.Endpoint;
 import com.github.wenweihu86.raft.RaftNode;
 import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftConsensusService;
@@ -270,6 +266,12 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
             long index = request.getPrevLogIndex();
 //            LOG.info("{}", request.getEntriesList());
             for (RaftProto.LogEntry entry : request.getEntriesList()) {
+//                // 跳过无意义的index
+//                if (entry.getType().equals(RaftProto.EntryType.ENTRY_TYPE_EMPTY_DATA)){
+//                    while (entry.getIndex() > index){
+//                        index++;
+//                    }
+//                }
                 index++;
                 // 小于当前Segment中FirstLog的index都应当是非法的，直接跳过就可以
                 if (index < raftNode.getRaftLog().getFirstLogIndex()) {
@@ -509,14 +511,23 @@ public class RaftConsensusServiceImpl implements RaftConsensusService {
                 request.getPrevLogIndex() + request.getEntriesCount());
         raftNode.setCommitIndex(newCommitIndex);
         raftNode.getRaftLog().updateMetaData(null,null, null, newCommitIndex);
+        LOG.info("raftNode.getLastAppliedIndex({}) , raftNode.getCommitIndex({})",raftNode.getLastAppliedIndex(), raftNode.getCommitIndex());
         if (raftNode.getLastAppliedIndex() < raftNode.getCommitIndex()) {
             // apply state machine
             for (long index = raftNode.getLastAppliedIndex() + 1;
                  index <= raftNode.getCommitIndex(); index++) {
                 RaftProto.LogEntry entry = raftNode.getRaftLog().getEntry(index);
-                if (entry != null) {
+                if (entry != null && !entry.getType().equals(RaftProto.EntryType.ENTRY_TYPE_EMPTY_DATA)) {
                     if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_DATA || entry.getType() == RaftProto.EntryType.ENTRY_TYPE_FUTURE_DATA) {
-//                        LOG.info("applying for {}", entry.getIndex());
+                        LOG.info("applying for {}", entry.getIndex());
+                        if (entry.getIndex() % 1000 == 0){
+                            if (raftNode.getLastTimePerK() == 0){
+                                raftNode.setLastTimePerK(System.currentTimeMillis());
+                            } else {
+                                raftNode.setTpsPerK(System.currentTimeMillis() - raftNode.getLastTimePerK());
+                                raftNode.setLastTimePerK(System.currentTimeMillis());
+                            }
+                        }
                         raftNode.getStateMachine().apply(entry.getData().toByteArray());
                     } else if (entry.getType() == RaftProto.EntryType.ENTRY_TYPE_CONFIGURATION) {
                         raftNode.applyConfiguration(entry);

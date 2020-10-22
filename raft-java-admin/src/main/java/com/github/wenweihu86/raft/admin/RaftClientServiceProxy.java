@@ -4,7 +4,6 @@ import com.baidu.brpc.client.BrpcProxy;
 import com.baidu.brpc.client.RpcClient;
 import com.baidu.brpc.client.RpcClientOptions;
 import com.baidu.brpc.client.instance.Endpoint;
-import com.github.wenweihu86.raft.proto.RaftProto;
 import com.github.wenweihu86.raft.service.RaftClientService;
 import com.googlecode.protobuf.format.JsonFormat;
 import org.slf4j.Logger;

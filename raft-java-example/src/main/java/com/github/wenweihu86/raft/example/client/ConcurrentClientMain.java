@@ -56,13 +56,13 @@ public class ConcurrentClientMain {
         ExecutorService writeThreadPool = Executors.newFixedThreadPool(20);
         Future<?>[] future = new Future[20];
         // 每个线程提交的entry数量
-        Integer submitSum = 10000000;
+        Integer submitSum = 200000;
         // 线程数
-        Integer threadSum = 10;
+        Integer threadSum = 20;
         List<Record> queryArr = new ArrayList<>();
         // 预先生成 submitSum * threadSum 的 键值对， N代表普通请求， F代表无事务依赖请求，
         for (int j=0;j<submitSum*threadSum;j++){
-            queryArr.add(new Record(UUID.randomUUID().toString(), j % 4 == 0? "F": "N"));
+            queryArr.add(new Record(UUID.randomUUID().toString(), j % 10 < 5 ? "N": "N"));
         }
         // 创建线程，开始提交entry
         for (int i = 0; i < threadSum; i++) {
@@ -70,7 +70,7 @@ public class ConcurrentClientMain {
                     "F", queryArr.subList(i*submitSum, (i+1)*submitSum), submitSum));
         }
         // 等待上面的线程执行完
-        Thread.sleep(20000L);
+        Thread.sleep(20000000L);
 
 //        // 再来一次
 //        List<Record> queryArr2 = new ArrayList<>();
@@ -87,7 +87,7 @@ public class ConcurrentClientMain {
 //        for (Record key: queryArr){
 //            readThreadPool.submit(new GetTask(exampleService, key.getKey(), key.getType()));
 //        }
-        Thread.sleep(100000L);
+        Thread.sleep(1000000L);
 //        Thread.sleep(2000L);
 //        for (int i = 0; i < 15; i++) {
 //            future[i] = writeThreadPool.submit(new SetTask(exampleService, readThreadPool, "N"));
@@ -125,12 +125,12 @@ public class ConcurrentClientMain {
                 ExampleProto.SetResponse setResponse = exampleService.set(setRequest);
                 try {
                     if (setResponse != null) {
-                        System.out.printf("set %s request, key=%s, value=%s, response=%s, elapseMS=%d\n",
+                        System.out.printf("time : %d, set %s request, key=%s, value=%s, response=%s, elapseMS=%d\n", System.currentTimeMillis(),
                                 setRequest.getType(), queryArr.get(i).getKey(), queryArr.get(i).getKey(), jsonFormat.printToString(setResponse), System.currentTimeMillis() - startTime);
                         if (setRequest.getType().equals("F")) {
-                            scheduledReadThreadPool.schedule(new GetTask(exampleService, queryArr.get(i).getKey(), setRequest.getType(), setResponse.getIndex()), 50, TimeUnit.MILLISECONDS);
-                        } else {
-                            readThreadPool.submit(new GetTask(exampleService, queryArr.get(i).getKey(), setRequest.getType(), setResponse.getWait()));
+//                            scheduledReadThreadPool.schedule(new GetTask(scheduledReadThreadPool, exampleService, queryArr.get(i).getKey(), setRequest.getType(), setResponse.getIndex(),1), setResponse.getWait(), TimeUnit.MILLISECONDS);
+//                        } else {
+//                            readThreadPool.submit(new GetTask(scheduledReadThreadPool, exampleService, queryArr.get(i).getKey(), setRequest.getType(), setResponse.getWait()));
                         }
                     } else {
                         System.out.printf("set request failed, key=%s value=%s\n", queryArr.get(i), queryArr.get(i));
@@ -145,46 +145,40 @@ public class ConcurrentClientMain {
 
     public static class GetTask implements Runnable {
         private ExampleService exampleService;
+        ScheduledExecutorService scheduledReadThreadPool;
         private String key;
         private String type;
         private Long index;
+        private int times;
 
-        public GetTask(ExampleService exampleService, String key, String type, long index) {
+        public GetTask(ScheduledExecutorService scheduledReadThreadPool, ExampleService exampleService, String key, String type, long index, int times) {
+            this.scheduledReadThreadPool = scheduledReadThreadPool;
             this.exampleService = exampleService;
             this.key = key;
             this.type = type;
             this.index = index;
+            this.times = times;
         }
 
         @Override
         public void run() {
-//            try {
-//                Thread.sleep(50L);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
             ExampleProto.GetRequest getRequest = ExampleProto.GetRequest.newBuilder()
                     .setKey(key).setIndex(index).build();
-            int time = 1;
-            while (true) {
-                long startTime = System.currentTimeMillis();
-                ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
-                try {
-                    if (getResponse != null) {
-                        if (type.equals("F")){
-                            System.out.print("");
-                        }
-                        System.out.printf("%d get %s request, key=%s, response=%s, elapseMS=%d\n", time++,
-                                type, key, jsonFormat.printToString(getResponse), System.currentTimeMillis() - startTime);
-                        if (jsonFormat.printToString(getResponse).length()>0){
-                            break;
-                        }
+            long startTime = System.currentTimeMillis();
+            ExampleProto.GetResponse getResponse = exampleService.get(getRequest);
+            try {
+                if (getResponse != null) {
+                    if (getResponse.getValue().isEmpty()){
+                        scheduledReadThreadPool.schedule(new GetTask(scheduledReadThreadPool, exampleService, key, "F", getResponse.getIndex(), times+1), getResponse.getWait(), TimeUnit.MILLISECONDS);
                     } else {
-                        System.out.printf("get request failed, key=%s\n", key);
+                        System.out.printf("%dth, time: %d, get %s request, key=%s, response=%s, elapseMS=%d\n", times, System.currentTimeMillis(),
+                                type, key, jsonFormat.printToString(getResponse), System.currentTimeMillis() - startTime);
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                } else {
+                    System.out.printf("get request failed, key=%s\n", key);
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         }
     }

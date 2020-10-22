@@ -121,7 +121,10 @@ public class ExampleServiceImpl implements ExampleService {
             responseBuilder.setValue(value);
         } else if (request.getIndex()!=0) {
             responseBuilder.setIndex(request.getIndex());
-            responseBuilder.setWait((request.getIndex() - raftNode.getLastAppliedIndex()) * raftNode.getTpsPerK() / 1000);
+            responseBuilder.setWait((request.getIndex() - raftNode.getLastAppliedIndex()) * raftNode.getTpsPerK() / 1000 + 50);
+            if (responseBuilder.getWait() < 0){
+                responseBuilder.setWait(raftNode.getTpsPerK());
+            }
         }
         ExampleProto.GetResponse response = responseBuilder.build();
         LOG.info("get request, request={}, response={}", jsonFormat.printToString(request),
